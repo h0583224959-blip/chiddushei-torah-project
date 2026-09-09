@@ -24,8 +24,34 @@ const getItemById = async (req, res) => {
     res.status(500).json({ message: 'שגיאה בשליפת הפריט', error: error.message });
   }
 };
+// @desc    יצירת פריט חדש
+// @route   POST /api/items
+// @access  Public
+const createItem = async (req, res) => {
+  try {
+    const { title, author, description, fileUrl, coverImage } = req.body;
 
+    // בדיקת שדות חובה
+    if (!title || !author || !fileUrl) {
+      return res.status(400).json({ message: 'נא למלא את כל שדות החובה: כותרת, מחבר וקובץ' });
+    }
+
+    // יצירת המסמך במסד הנתונים
+    const newItem = await Item.create({
+      title,
+      author,
+      description,
+      fileUrl,
+      coverImage,
+    });
+
+    res.status(201).json(newItem);
+  } catch (error) {
+    res.status(500).json({ message: 'שגיאה ביצירת הפריט', error: error.message });
+  }
+};
 module.exports = {
   getItems,
   getItemById,
+  createItem,
 };
