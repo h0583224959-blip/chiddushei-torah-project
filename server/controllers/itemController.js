@@ -36,13 +36,14 @@ const createItem = async (req, res) => {
       return res.status(400).json({ message: 'נא למלא את כל שדות החובה: כותרת, מחבר וקובץ' });
     }
 
-    // יצירת המסמך במסד הנתונים
+    // יצירת המסמך במסד הנתונים יחד עם מזהה המשתמש המחובר
     const newItem = await Item.create({
       title,
       author,
       description,
       fileUrl,
       coverImage,
+      user: req.user._id, // שיוך הפריט למשתמש שיצר אותו
     });
 
     res.status(201).json(newItem);

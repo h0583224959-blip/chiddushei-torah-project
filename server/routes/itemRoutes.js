@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { 
-    getItems, 
-    getItemById, 
-    createItem, 
-    updateItem, 
-    deleteItem 
+const {
+    getItems,
+    getItemById,
+    createItem,
+    updateItem,
+    deleteItem
 } = require('../controllers/itemController');
 const upload = require('../middlewares/uploadMiddleware');
 
