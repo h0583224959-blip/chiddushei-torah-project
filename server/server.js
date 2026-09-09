@@ -7,7 +7,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const userRoutes = require('./routes/userRoutes');
-const itemRoutes = require('./routes/itemRoutes');
+//const itemRoutes = require('./routes/itemRoutes');
 
 const app = express();
 
@@ -18,7 +18,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ניתובי כתובות
 app.use('/api/users', userRoutes);
-app.use('/api/items', itemRoutes);
+//app.use('/api/items', itemRoutes);
 
 // הפעלת השרת וחיבור למסד הנתונים
 const PORT = process.env.PORT || 5000;
