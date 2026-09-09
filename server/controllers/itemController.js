@@ -50,8 +50,40 @@ const createItem = async (req, res) => {
     res.status(500).json({ message: 'שגיאה ביצירת הפריט', error: error.message });
   }
 };
+const updateItem = async (req, res) => {
+  try {
+    const updatedItem = await Item.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedItem) {
+      return res.status(404).json({ message: 'הפריט לא נמצא לעדכון' });
+    }
+
+    res.status(200).json(updatedItem);
+  } catch (error) {
+    res.status(500).json({ message: 'שגיאה בעדכון הפריט', error: error.message });
+  }
+};
+const deleteItem = async (req, res) => {
+  try {
+    const deletedItem = await Item.findByIdAndDelete(req.params.id);
+
+    if (!deletedItem) {
+      return res.status(404).json({ message: 'הפריט לא נמצא למחיקה' });
+    }
+
+    res.status(200).json({ message: 'הפריט נמחק בהצלחה', id: req.params.id });
+  } catch (error) {
+    res.status(500).json({ message: 'שגיאה במחיקת הפריט', error: error.message });
+  }
+};
 module.exports = {
   getItems,
   getItemById,
   createItem,
+  updateItem,
+  deleteItem,
 };
