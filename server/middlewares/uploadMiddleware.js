@@ -21,6 +21,13 @@ const fileFilter = (req, file, cb) => {
         cb(new Error('שגיאה: ניתן להעלות קובצי שמע או תמונה מורשים בלבד!'));
     }
 };
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 20 * 1024 * 1024 }, // הגבלה לעד 20MB
+    fileFilter: fileFilter
+});
+
+module.exports = upload;
 
 
 
