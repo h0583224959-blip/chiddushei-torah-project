@@ -11,3 +11,16 @@ const storage = multer.diskStorage({
     }
 });
 
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp|mp3|m4a|wav|ogg|aac/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    
+    if (extname) {
+        return cb(null, true);
+    } else {
+        cb(new Error('שגיאה: ניתן להעלות קובצי שמע או תמונה מורשים בלבד!'));
+    }
+};
+
+
+
