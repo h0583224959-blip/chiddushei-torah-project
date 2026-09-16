@@ -102,7 +102,7 @@ async function login(email, password) {
     // שמירת מזהה ההתחברות וההרשאה בזיכרון המקומי של הדפדפן
     if (data.token) {
       localStorage.setItem('token', data.token);
-      localStorage.setItem('userRole', data.role || 'user');
+      localStorage.setItem('role', data.role || 'user');
     }
     
     return data;
@@ -117,7 +117,7 @@ async function login(email, password) {
  */
 function getCurrentUser() {
   const token = localStorage.getItem('token');
-  const role = localStorage.getItem('userRole');
+  const role = localStorage.getItem('role');
   
   if (token) {
     return { token, role };
@@ -130,5 +130,5 @@ function getCurrentUser() {
  */
 function logout() {
   localStorage.removeItem('token');
-  localStorage.removeItem('userRole');
+  localStorage.removeItem('role');
 }
