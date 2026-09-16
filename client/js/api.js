@@ -24,3 +24,30 @@ async function getItems() {
     throw error;
   }
 }
+
+/**
+ * פונקציה להעלאת פריט חדש יחד עם קובץ
+ * מקבלת: formData - אובייקט שמכיל את השדות (כותרת, מחבר) ואת הקובץ
+ * מחזירה: את הפריט החדש שנוצר בשרת
+ */
+async function createItem(formData) {
+  try {
+    // שליחת בקשת POST עם הנתונים והקובץ
+    const response = await fetch(`${BASE_URL}/items`, {
+      method: 'POST',
+      body: formData // הדפדפן מוסיף לבד את הכותרות המתאימות לקובץ
+    });
+    
+    // בדיקה האם היצירה הצליחה
+    if (!response.ok) {
+      throw new Error('שגיאה ביצירת הפריט ושמירתו');
+    }
+    
+    // החזרת הנתונים של הפריט החדש שנשמר
+    const newItem = await response.json();
+    return newItem;
+  } catch (error) {
+    console.error('שגיאה בפונקציה createItem:', error);
+    throw error;
+  }
+}
