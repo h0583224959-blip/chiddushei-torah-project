@@ -51,3 +51,28 @@ async function createItem(formData) {
     throw error;
   }
 }
+
+/**
+ * פונקציה למחיקת פריט קיים
+ * מקבלת: id - המזהה הייחודי של הפריט למחיקה
+ * מחזירה: אישור על המחיקה מהשרת
+ */
+async function deleteItem(id) {
+  try {
+    // שליחת בקשת מחיקה עם ה-id בנתיב
+    const response = await fetch(`${BASE_URL}/items/${id}`, {
+      method: 'DELETE'
+    });
+    
+    // בדיקה האם המחיקה עברה בהצלחה
+    if (!response.ok) {
+      throw new Error('שגיאה בעת מחיקת הפריט');
+    }
+    
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('שגיאה בפונקציה deleteItem:', error);
+    throw error;
+  }
+}
