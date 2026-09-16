@@ -47,7 +47,7 @@ const createItem = async (req, res) => {
     }
 
     // שמירת הנתיב של הקובץ שהועלה
-    const fileUrl = req.file.path.replace(/\\/g, '/');
+    const fileUrl = `http://localhost:5000/uploads/${req.file.filename}`;
 
     // יצירת המסמך במסד הנתונים
     const newItem = await Item.create({
