@@ -11,6 +11,10 @@ const getItems = async (req, res) => {
     res.status(500).json({ message: 'שגיאה בשליפת הפריטים', error: error.message });
   }
 };
+
+// @desc    קבלת פריט בודד לפי מזהה
+// @route   GET /api/items/:id
+// @access  Public
 const getItemById = async (req, res) => {
   try {
     const item = await Item.findById(req.params.id);
@@ -24,26 +28,35 @@ const getItemById = async (req, res) => {
     res.status(500).json({ message: 'שגיאה בשליפת הפריט', error: error.message });
   }
 };
+
 // @desc    יצירת פריט חדש
 // @route   POST /api/items
 // @access  Public
 const createItem = async (req, res) => {
   try {
-    const { title, author, description, fileUrl, coverImage } = req.body;
+    const { title, author, description, coverImage } = req.body;
 
-    // בדיקת שדות חובה
-    if (!title || !author || !fileUrl) {
-      return res.status(400).json({ message: 'נא למלא את כל שדות החובה: כותרת, מחבר וקובץ' });
+    // בדיקת תקינות העלאת הקובץ
+    if (!req.file) {
+      return res.status(400).json({ message: 'נא להעלות קובץ' });
     }
 
-    // יצירת המסמך במסד הנתונים יחד עם מזהה המשתמש המחובר
+    // בדיקת שדות חובה בטופס
+    if (!title || !author) {
+      return res.status(400).json({ message: 'נא למלא את כל שדות החובה: כותרת ומחבר' });
+    }
+
+    // שמירת הנתיב של הקובץ שהועלה
+    const fileUrl = req.file.path.replace(/\\/g, '/');
+
+    // יצירת המסמך במסד הנתונים
     const newItem = await Item.create({
       title,
       author,
       description,
       fileUrl,
       coverImage,
-      user: req.user._id, // שיוך הפריט למשתמש שיצר אותו
+      user: req.user ? req.user._id : null,
     });
 
     res.status(201).json(newItem);
@@ -51,6 +64,10 @@ const createItem = async (req, res) => {
     res.status(500).json({ message: 'שגיאה ביצירת הפריט', error: error.message });
   }
 };
+
+// @desc    עדכון פריט
+// @route   PUT /api/items/:id
+// @access  Public
 const updateItem = async (req, res) => {
   try {
     const updatedItem = await Item.findByIdAndUpdate(
@@ -68,6 +85,10 @@ const updateItem = async (req, res) => {
     res.status(500).json({ message: 'שגיאה בעדכון הפריט', error: error.message });
   }
 };
+
+// @desc    מחיקת פריט
+// @route   DELETE /api/items/:id
+// @access  Public
 const deleteItem = async (req, res) => {
   try {
     const deletedItem = await Item.findByIdAndDelete(req.params.id);
@@ -81,6 +102,7 @@ const deleteItem = async (req, res) => {
     res.status(500).json({ message: 'שגיאה במחיקת הפריט', error: error.message });
   }
 };
+
 module.exports = {
   getItems,
   getItemById,

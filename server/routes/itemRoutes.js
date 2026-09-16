@@ -1,29 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const {
-  getItems,
-  getItemById,
-  createItem,
-  updateItem,
-  deleteItem,
+    getItems,
+    getItemById,
+    createItem,
+    updateItem,
+    deleteItem
 } = require('../controllers/itemController');
+const upload = require('../middlewares/uploadMiddleware');
 
-// ייבוא פונקציות ההגנה וההרשאות
-const { protect, admin } = require('../middlewares/authMiddleware');
-
-// קבלת כל הפריטים - פתוח לכולם
+// נתיב לקבלת כל הפריטים
 router.get('/', getItems);
 
-// קבלת פריט בודד לפי מזהה - פתוח לכולם
+// נתיב לקבלת פריט בודד לפי מזהה
 router.get('/:id', getItemById);
 
-// יצירת פריט חדש - דורש משתמש מחובר בלבד
-router.post('/', protect, createItem);
+// נתיב ליצירת פריט חדש כולל העלאת קובץ
+router.post('/', upload.single('audio'), createItem);
 
-// עדכון פריט - דורש משתמש מחובר שהוא מנהל
-router.put('/:id', protect, admin, updateItem);
+// נתיב לעדכון פריט
+router.put('/:id', updateItem);
 
-// מחיקת פריט - דורש משתמש מחובר שהוא מנהל
-router.delete('/:id', protect, admin, deleteItem);
+// נתיב למחיקת פריט
+router.delete('/:id', deleteItem);
 
 module.exports = router;
