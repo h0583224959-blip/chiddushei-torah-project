@@ -111,3 +111,24 @@ async function login(email, password) {
     throw error;
   }
 }
+/**
+ * בדיקת מצב ההתחברות הנוכחי
+ * מחזירה: אובייקט עם טוקן ותפקיד אם מחובר, או null אם לא מחובר
+ */
+function getCurrentUser() {
+  const token = localStorage.getItem('token');
+  const role = localStorage.getItem('userRole');
+  
+  if (token) {
+    return { token, role };
+  }
+  return null;
+}
+
+/**
+ * התנתקות מהמערכת ומחיקת נתוני ההתחברות מהדפדפן
+ */
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('userRole');
+}
