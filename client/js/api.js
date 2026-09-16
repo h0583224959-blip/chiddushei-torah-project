@@ -76,3 +76,38 @@ async function deleteItem(id) {
     throw error;
   }
 }
+/**
+ * פונקציה להתחברות משתמש
+ * מקבלת: email, password
+ * שומרת ב-localStorage: טוקן ותפקיד משתמש
+ */
+async function login(email, password) {
+  try {
+    // שליחת פרטי המשתמש בפורמט JSON
+    const response = await fetch(`${BASE_URL}/users/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+    
+    // אם הסיסמה או האימייל לא נכונים
+    if (!response.ok) {
+      throw new Error('פרטי התחברות שגויים');
+    }
+    
+    const data = await response.json();
+    
+    // שמירת מזהה ההתחברות וההרשאה בזיכרון המקומי של הדפדפן
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userRole', data.role || 'user');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('שגיאה בפונקציה login:', error);
+    throw error;
+  }
+}
