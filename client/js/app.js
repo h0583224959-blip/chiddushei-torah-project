@@ -117,16 +117,35 @@ async function handleDeleteItem(id) {
 // הפעלה אוטומטית ברגע שהדף נטען
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. בדיקת הרשאות מנהל ועדכון תצוגה
+  // 1. עדכון כפתור כניסה/יציאה ושם המשתמש בסרגל העליון
+  const authBtn = document.getElementById('authActionBtn');
+  const userNameDisplay = document.getElementById('userNameDisplay');
+  const token = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
+
+  if (token) {
+    if (userNameDisplay) userNameDisplay.textContent = `שלום, ${role === 'admin' ? 'מנהל' : 'משתמש'}`;
+    if (authBtn) {
+      authBtn.textContent = 'התנתקות';
+      authBtn.href = '#';
+      authBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        logout();
+        window.location.reload();
+      });
+    }
+  }
+
+  // 2. בדיקת הרשאות מנהל ועדכון תצוגה
   checkAdminState();
 
-  // 2. האזנה לשליחת טופס ההוספה (אם קיים בדף)
+  // 3. האזנה לשליחת טופס ההוספה (אם קיים בדף)
   const uploadForm = document.getElementById('upload-form');
   if (uploadForm) {
     uploadForm.addEventListener('submit', handleFormSubmit);
   }
 
-  // 3. טעינת הפריטים הראשונית מהשרת
+  // 4. טעינת הפריטים הראשונית מהשרת
   try {
     if (typeof getItems === 'function') {
       const items = await getItems();
@@ -137,6 +156,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('שגיאה בטעינת הנתונים:', err);
   }
 });
+
+// ============================================================
+// פונקציית הורדת קובץ
+// ============================================================
 async function triggerDownload(url, title) {
   try {
     const response = await fetch(url);

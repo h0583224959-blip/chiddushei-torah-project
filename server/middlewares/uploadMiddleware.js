@@ -1,18 +1,26 @@
 const multer = require('multer');
 const path = require('path');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '../uploads'));
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
+// הגדרת החיבור ל-Cloudinary באמצעות המשתנים מקובץ ה-.env
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// הגדרת האחסון בענן
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'project_files',
+    resource_type: 'auto', // מאפשר תמיכה אוטומטית בתמונות, שמע ומסמכים
+  },
+});
+
+// בדיקת סוגי הקבצים המותרים
 const fileFilter = (req, file, cb) => {
-  // הסרת הנקודה מתחילת הסיומת והפיכה לאותיות קטנות
   const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
   const allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'mp3', 'm4a', 'wav', 'ogg', 'aac', 'pdf'];
 
@@ -28,13 +36,11 @@ const fileFilter = (req, file, cb) => {
     cb(new Error('שגיאה: ניתן להעלות קובצי שמע, תמונה או PDF בלבד!'));
   }
 };
+
 const upload = multer({
-    storage: storage,
-    limits: { fileSize: 20 * 1024 * 1024 }, // הגבלה לעד 20MB
-    fileFilter: fileFilter
+  storage: storage,
+  limits: { fileSize: 20 * 1024 * 1024 }, // הגבלה לעד 20MB
+  fileFilter: fileFilter,
 });
 
 module.exports = upload;
-
-
-
