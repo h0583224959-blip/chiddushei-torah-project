@@ -12,14 +12,21 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp|mp3|m4a|wav|ogg|aac|pdf/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    
-    if (extname) {
-        return cb(null, true);
-    } else {
-        cb(new Error('שגיאה: ניתן להעלות קובצי שמע או תמונה מורשים בלבד!'));
-    }
+  // הסרת הנקודה מתחילת הסיומת והפיכה לאותיות קטנות
+  const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
+  const allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'mp3', 'm4a', 'wav', 'ogg', 'aac', 'pdf'];
+
+  const isAllowedExt = allowedExtensions.includes(ext);
+  const isAllowedMime = 
+    file.mimetype.startsWith('image/') || 
+    file.mimetype.startsWith('audio/') || 
+    file.mimetype === 'application/pdf';
+
+  if (isAllowedExt || isAllowedMime) {
+    return cb(null, true);
+  } else {
+    cb(new Error('שגיאה: ניתן להעלות קובצי שמע, תמונה או PDF בלבד!'));
+  }
 };
 const upload = multer({
     storage: storage,
