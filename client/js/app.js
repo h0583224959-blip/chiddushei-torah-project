@@ -137,3 +137,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('שגיאה בטעינת הנתונים:', err);
   }
 });
+async function triggerDownload(url, title) {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+
+    const extension = url.split('.').pop();
+    a.download = `${title || 'file'}.${extension}`;
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    console.error('שגיאה בהורדת הקובץ:', error);
+    alert('שגיאה בהורדת הקובץ');
+  }
+}
