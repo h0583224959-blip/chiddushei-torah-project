@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp|mp3|m4a|wav|ogg|aac/;
+    const allowedTypes = /jpeg|jpg|png|gif|webp|mp3|m4a|wav|ogg|aac|pdf/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     
     if (extname) {
