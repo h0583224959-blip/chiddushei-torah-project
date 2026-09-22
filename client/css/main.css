@@ -189,9 +189,34 @@ body {
 }
 
 .download-btn {
-  flex: 1;
-  background: #0f172a;
+  background-color: #1a2a44;
   color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  
+  /* קיבוע גודל ומניעת הימתחות */
+  height: 42px;
+  flex-grow: 0;
+  margin-top: auto;
+  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.download-btn:hover {
+  background-color: #24385a;
+}
+
+.download-btn:active {
+  transform: scale(0.98);
 }
 
 .delete-btn {
