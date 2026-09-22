@@ -26,7 +26,7 @@ function renderItems(items) {
       <h3>${item.title}</h3>
       <p class="author">מאת: ${item.author}</p>
       ${item.description ? `<p class="desc">${item.description}</p>` : ''}
-      <a href="${item.fileUrl}" target="_blank" download class="btn download-btn">הורדת קובץ</a>
+      <button type="button" class="btn download-btn" onclick="triggerDownload('${item.fileUrl}', '${item.title}')">הורדת קובץ</button>
       ${
         role === 'admin'
           ? `<button class="btn delete-btn" onclick="handleDeleteItem('${item._id}')">מחיקה</button>`
