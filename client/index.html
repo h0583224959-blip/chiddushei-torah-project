@@ -3,116 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>מערכת שיתוף קבצים</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f4f4f9;
-      color: #333;
-    }
-    header {
-      margin-bottom: 20px;
-    }
-    input[type="text"] {
-      padding: 8px 12px;
-      width: 300px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .form-section {
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 25px;
-      max-width: 400px;
-    }
-    .form-group {
-      margin-bottom: 12px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 4px;
-      font-weight: bold;
-    }
-    .form-group input, .form-group textarea {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 16px;
-    }
-    .item-card {
-      background: #fff;
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      border-right: 4px solid #007bff;
-    }
-    .btn {
-      display: inline-block;
-      padding: 6px 12px;
-      text-decoration: none;
-      border-radius: 4px;
-      cursor: pointer;
-      border: none;
-      font-size: 14px;
-      margin-top: 8px;
-    }
-    .download-btn {
-      background-color: #28a745;
-      color: white;
-    }
-    .delete-btn {
-      background-color: #dc3545;
-      color: white;
-      margin-right: 8px;
-    }
-  </style>
+  <title>מאגר פריטים</title>
+  <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 
-  <header>
-    <h1>מאגר פריטים</h1>
-    <!-- תיבת החיפוש -->
-    <input type="text" id="search-input" placeholder="חיפוש לפי כותרת או מחבר...">
+  <header class="navbar">
+    <div class="logo">מאגר פריטים</div>
+    <div class="user-info">
+      <span id="userNameDisplay">שלום, משתמש</span>
+      <a href="login.html" id="authActionBtn" class="btn logout-btn">כניסה</a>
+    </div>
   </header>
 
-  <main>
-    <!-- טופס הוספת פריט -->
-    <section class="form-section admin-only">
-      <h2>הוספת פריט חדש</h2>
-      <form id="upload-form">
+  <main class="main-content">
+    <section class="search-section">
+      <input type="text" id="search-input" class="search-input" placeholder="חיפוש לפי כותרת או מחבר...">
+    </section>
+
+    <!-- טופס העלאת פריט -->
+    <section class="upload-section admin-only">
+      <form class="upload-form" id="upload-form">
         <div class="form-group">
           <label for="title">כותרת:</label>
-          <input type="text" id="title" name="title" required>
+          <input type="text" id="title" name="title" class="form-input" required>
         </div>
         <div class="form-group">
           <label for="author">מחבר:</label>
-          <input type="text" id="author" name="author" required>
+          <input type="text" id="author" name="author" class="form-input" required>
         </div>
         <div class="form-group">
           <label for="description">תיאור:</label>
-          <textarea id="description" name="description" rows="3"></textarea>
+          <input type="text" id="description" name="description" class="form-input">
         </div>
         <div class="form-group">
           <label for="file">קובץ:</label>
-          <input type="file" id="file" name="audio" required>
+          <input type="file" id="file" name="audio" class="form-input" required>
         </div>
-        <button type="submit" class="btn download-btn">העלאת פריט</button>
+        <button type="submit" class="btn submit-btn">העלאת פריט</button>
       </form>
     </section>
 
-    <!-- מיכל הפריטים -->
-    <h2>רשימת הפריטים</h2>
-    <div id="items-container" class="cards-grid"></div>
+    <!-- מיכל כרטיסי הפריטים -->
+    <section id="items-container" class="items-grid"></section>
   </main>
 
   <script src="js/api.js"></script>

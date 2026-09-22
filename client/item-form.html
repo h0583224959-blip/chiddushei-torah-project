@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>טופס פריט</title>
+  <link rel="stylesheet" href="css/item-form.css">
+</head>
+<body>
+
+  <main class="form-wrapper">
+    <header class="form-header">
+      <h2 id="formTitle">הוספת / עריכת פריט</h2>
+      <p>מלאו את שדות הטופס וצרפו את הקבצים המתאימים</p>
+    </header>
+
+    <form id="itemDetailForm">
+      <div class="form-row">
+        <label for="fullTitle">שם הפריט / כותרת</label>
+        <input type="text" id="fullTitle" class="input-field" required>
+      </div>
+
+      <div class="form-row">
+        <label for="fullAuthor">מחבר</label>
+        <input type="text" id="fullAuthor" class="input-field" required>
+      </div>
+
+      <div class="form-row">
+        <label for="fullDesc">תיאור</label>
+        <textarea id="fullDesc" class="textarea-field" required></textarea>
+      </div>
+
+      <div class="form-row">
+        <label for="mediaFile">קובץ מצורף</label>
+        <input type="file" id="mediaFile" class="file-input" required>
+      </div>
+
+      <div class="form-buttons">
+        <a href="index.html" class="cancel-btn">ביטול</a>
+        <button type="submit" class="save-btn">שמירה</button>
+      </div>
+    </form>
+  </main>
+
+  <script src="js/item-form.js"></script>
+</body>
+</html>
