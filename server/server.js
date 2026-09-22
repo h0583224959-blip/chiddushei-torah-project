@@ -25,6 +25,16 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 app.use('/api/users', userRoutes);
 app.use('/api/items', itemRoutes);
 
+// תופס שגיאות מרכזי (מדפיס שגיאות העלאה של Multer ו-Cloudinary)
+app.use((err, req, res, next) => {
+  console.error('--- שגיאה שנתפסה בשרת ---');
+  console.error(err);
+  res.status(500).json({ 
+    message: err.message || 'שגיאה כללית בשרת',
+    error: err 
+  });
+});
+
 // הפעלת השרת וחיבור למסד הנתונים
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;

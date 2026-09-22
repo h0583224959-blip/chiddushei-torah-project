@@ -32,8 +32,11 @@ const getItemById = async (req, res) => {
 // @desc    יצירת פריט חדש
 // @route   POST /api/items
 // @access  Public
+
 const createItem = async (req, res) => {
   try {
+    console.log('נתוני הקובץ שהתקבל:', req.file);
+console.log('נתוני הגוף:', req.body);
     const { title, author, description, coverImage } = req.body;
 
     // בדיקת תקינות העלאת הקובץ
@@ -46,8 +49,8 @@ const createItem = async (req, res) => {
       return res.status(400).json({ message: 'נא למלא את כל שדות החובה: כותרת ומחבר' });
     }
 
-    // שמירת הנתיב של הקובץ שהועלה
-    const fileUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+    // שמירת הקישור הישיר מהענן (Cloudinary)
+    const fileUrl = req.file.path;
 
     // יצירת המסמך במסד הנתונים
     const newItem = await Item.create({
@@ -59,8 +62,9 @@ const createItem = async (req, res) => {
       user: req.user ? req.user._id : null,
     });
 
-    res.status(201).json(newItem);
+res.status(201).json(newItem);
   } catch (error) {
+    console.error('פירוט השגיאה המלאה בשרת:', error);
     res.status(500).json({ message: 'שגיאה ביצירת הפריט', error: error.message });
   }
 };
