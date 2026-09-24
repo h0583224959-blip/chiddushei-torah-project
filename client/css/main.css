@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&family=Assistant:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Frank+Ruhl+Libre:wght@500;600;700&display=swap');
 
 * {
   box-sizing: border-box;
@@ -7,219 +7,525 @@
 }
 
 body {
-  font-family: 'Assistant', 'Heebo', sans-serif;
-  background-color: #f8fafc;
-  color: #1e293b;
+  font-family: 'Assistant', sans-serif;
   direction: rtl;
+  background: #eef3f5;
+  color: #1e293b;
   min-height: 100vh;
 }
 
 /* סרגל עליון */
-.navbar {
+header, nav, .navbar {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 17px max(24px, calc((100% - 1100px) / 2)) !important;
+  background: linear-gradient(110deg, #32104d 0%, #57237b 60%, #3a155d 100%) !important;
+  border-bottom: 4px solid #e2bd61 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.brand-lockup {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  background: linear-gradient(90deg, #0f172a 0%, #1e293b 100%);
-  padding: 16px 40px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  border-bottom: 2px solid #c59b27;
+  gap: 12px;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px 12px 4px 12px;
+  background: #e7c96f;
+  color: #3a155d;
+  font-family: 'Frank Ruhl Libre', serif;
+  font-size: 26px;
+  font-weight: 700;
 }
 
 .logo {
-  font-family: 'Heebo', sans-serif;
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #f8fafc;
+  color: #ffffff !important;
+  font-size: 21px !important;
+  font-weight: 800 !important;
 }
 
-.user-info {
+.brand-subtitle {
+  color: #eadcf2;
+  font-size: 11px;
+}
+
+.main-nav {
   display: flex;
   align-items: center;
-  gap: 16px;
-  color: #e2e8f0;
+  gap: 24px;
 }
 
-.btn {
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding: 8px 18px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
+.main-nav a {
+  color: #ffffff !important;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none !important;
+  transition: color 0.2s;
+}
+
+.main-nav a:hover {
+  color: #f0d67f !important;
+}
+
+/* כפתורי ניווט והתחברות */
+header a, header button, .auth-btn {
+  background-color: #e7c96f !important;
+  color: #32104d !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  border-radius: 9px !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+}
+
+/* מיכל ראשי */
+main, .container {
+  max-width: 1100px !important;
+  margin: 34px auto 60px !important;
+  padding: 0 20px !important;
+}
+
+.welcome-section {
+  position: relative;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  text-decoration: none;
-}
-
-.logout-btn {
-  background-color: transparent;
-  color: #cbd5e1;
-  border: 1px solid #475569;
-}
-
-.logout-btn:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  justify-content: space-between;
+  min-height: 270px;
+  overflow: hidden;
+  padding: 32px 42px;
+  margin-bottom: 26px;
+  border-radius: 4px 4px 22px 22px;
+  background: linear-gradient(110deg, #351153 0%, #6e328d 58%, #40145f 100%);
   color: #ffffff;
+  box-shadow: 0 14px 30px rgba(15, 28, 46, 0.16);
 }
 
-/* אזור ראשי */
-.main-content {
-  max-width: 1200px;
-  margin: 35px auto;
-  padding: 0 25px;
+.welcome-section::after {
+  content: '';
+  position: absolute;
+  left: -3%;
+  bottom: -100px;
+  width: 420px;
+  height: 200px;
+  border: 2px solid rgba(231, 201, 111, 0.34);
+  border-radius: 50%;
+  transform: rotate(-12deg);
 }
 
-/* חיפוש */
+.eyebrow, .section-kicker {
+  color: #e7c96f;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.welcome-section h1 {
+  position: relative;
+  z-index: 1;
+  margin: 7px 0 8px;
+  font-family: 'Frank Ruhl Libre', serif;
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.welcome-section h1 em {
+  color: #f0d67f;
+  font-style: normal;
+}
+
+.welcome-section p {
+  position: relative;
+  z-index: 1;
+  color: #d3e0e2;
+  font-size: 16px;
+}
+
+.hero-book {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 142px;
+  height: 176px;
+  border: 8px solid #e7c96f;
+  border-radius: 4px 12px 12px 4px;
+  background: #f8e9bd;
+  color: #4a1b61;
+  font-family: 'Frank Ruhl Libre', serif;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: -14px 12px 0 rgba(34, 8, 52, 0.28), 0 16px 28px rgba(20, 5, 35, 0.25);
+  transform: rotate(7deg);
+}
+
+.hero-book::before,
+.hero-book::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(74, 27, 97, 0.35);
+}
+
+.hero-book::after {
+  inset: 20px 16px;
+  border-width: 0 1px;
+}
+
+/* אזור החיפוש */
 .search-section {
-  margin-bottom: 30px;
+  background: #fffdf8 !important;
+  border: 1px solid #e2d5c1 !important;
+  border-right: 6px solid #6b2c87 !important;
+  border-radius: 16px !important;
+  padding: 24px 28px !important;
+  margin-bottom: 30px !important;
+  box-shadow: 0 8px 22px rgba(15, 28, 46, 0.08) !important;
 }
 
-.search-input {
-  width: 100%;
-  padding: 14px 20px;
-  background: #ffffff;
-  border: 1.5px solid #cbd5e1;
+.search-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.search-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
   border-radius: 12px;
-  font-size: 1.05rem;
+  background: #f3e4a9;
+  color: #57237b;
+  font-size: 32px;
+  line-height: 1;
+}
+
+.search-heading h1 {
+  color: #0f1c2e;
+  font-size: 22px;
+  margin-bottom: 2px;
+}
+
+.search-heading p {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.search-form {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* שדה החיפוש - רוחב מוגדר ומראה נקי */
+form#search-form input[type="search"],
+.search-container input {
+  max-width: none !important;
+  width: 100% !important;
+  padding: 14px 18px !important;
+  border: 2px solid #cbd5e1 !important;
+  border-radius: 10px !important;
+  font-size: 16px !important;
+  outline: none !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+  margin-bottom: 0 !important;
+}
+
+.search-btn {
+  min-width: 132px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 10px;
+  background: #57237b;
+  color: #ffffff;
   font-family: inherit;
-  outline: none;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(87, 35, 123, 0.25);
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
-.search-input:focus {
-  border-color: #c59b27;
+.search-btn:hover {
+  background: #3f165e;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(87, 35, 123, 0.32);
 }
 
-/* טופס העלאה */
+.search-btn:focus-visible,
+.search-input:focus-visible {
+  outline: 3px solid rgba(87, 35, 123, 0.25);
+  outline-offset: 2px;
+}
+
+form#search-form input:focus,
+.search-container input:focus {
+  border-color: #6b2c87 !important;
+  box-shadow: 0 0 0 3px rgba(87, 35, 123, 0.15) !important;
+}
+
+@media (max-width: 560px) {
+  .search-section {
+    padding: 20px 16px !important;
+  }
+
+  .search-form {
+    flex-direction: column;
+  }
+
+  .search-btn {
+    min-height: 48px;
+  }
+}
+
 .upload-section {
-  background: #ffffff;
-  padding: 28px;
-  border-radius: 14px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-  margin-bottom: 40px;
+  background: #fffdf8;
+  border: 1px solid #e2d5c1;
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 22px rgba(15, 28, 46, 0.06);
+}
+
+.section-title {
+  margin-bottom: 18px;
+}
+
+.section-title h2 {
+  margin-top: 3px;
+  color: #451660;
+  font-size: 24px;
+  font-family: 'Frank Ruhl Libre', serif;
 }
 
 .upload-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
-  align-items: end;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
+  gap: 7px;
 }
 
 .form-group label {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #475569;
-  margin-bottom: 6px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .form-input {
-  padding: 10px 14px;
+  width: 100%;
+  padding: 12px 14px;
   border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  font-family: inherit;
-  outline: none;
-  background: #f8fafc;
-}
-
-.submit-btn {
-  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
-  color: #ffffff;
-  height: 42px;
-}
-
-/* כרטיסים */
-.items-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 25px;
-}
-
-.item-card {
+  border-radius: 9px;
   background: #ffffff;
-  border-radius: 14px;
-  border: 1px solid #e2e8f0;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  color: #1e293b;
+  font: inherit;
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: #6b2c87;
+  box-shadow: 0 0 0 3px rgba(87, 35, 123, 0.12);
+}
+
+.upload-form .submit-btn {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+/* טופס הוספת פריט - נשאר בתוך כרטיס לבן ומסודר */
+form#item-form, .control-card {
+  background: #ffffff !important;
+  padding: 24px !important;
+  border-radius: 12px !important;
+  border: 1px solid #dcdfe4 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  margin-bottom: 30px !important;
+}
+
+form#item-form input[type="text"] {
+  width: 100% !important;
+  padding: 11px 14px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  font-size: 15px !important;
+  outline: none !important;
+  background-color: #f8fafc !important;
+  margin-bottom: 12px !important;
+}
+
+form#item-form input:focus {
+  border-color: #0f1c2e !important;
+  background-color: #ffffff !important;
+}
+
+form button[type="submit"], .submit-btn {
+  background: #57237b !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 11px 24px !important;
+  border-radius: 6px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: opacity 0.2s;
+}
+
+form button[type="submit"]:hover {
+  opacity: 0.9;
+}
+/* רשת פריטים */
+#items-container, .items-grid, .items-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: 24px !important;
+}
+
+.library-section {
+  padding: 10px 0 30px;
+}
+
+.library-heading {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border-right: 4px solid #c59b27;
-  transition: transform 0.2s ease;
-}
-
-.item-card:hover {
-  transform: translateY(-3px);
-}
-
-.item-card h3 {
-  font-size: 1.3rem;
-  color: #0f172a;
-  margin-bottom: 6px;
-}
-
-.item-card .author {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #c59b27;
-  margin-bottom: 12px;
-}
-
-.item-card .desc {
-  font-size: 0.95rem;
-  color: #475569;
-  line-height: 1.5;
+  align-items: center;
+  gap: 18px;
   margin-bottom: 20px;
 }
 
-.card-actions {
-  display: flex;
-  gap: 10px;
-  border-top: 1px solid #f1f5f9;
-  padding-top: 15px;
+.library-heading h2 {
+  margin-top: 2px;
+  color: #351153;
+  font-family: 'Frank Ruhl Libre', serif;
+  font-size: 30px;
 }
 
-.download-btn {
-  background-color: #1a2a44;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 18px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  
-  /* קיבוע גודל ומניעת הימתחות */
-  height: 42px;
-  flex-grow: 0;
-  margin-top: auto;
-  
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  box-sizing: border-box;
+.library-rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to left, transparent, #d8b95e);
 }
 
-.download-btn:hover {
-  background-color: #24385a;
+/* כרטיס בודד */
+.item-card, #items-container > div {
+  position: relative;
+  overflow: hidden;
+  background: #fffdf8 !important;
+  border: 1px solid #d7c8b6 !important;
+  border-top: 5px solid #6b2c87 !important;
+  border-radius: 6px 6px 18px 18px !important;
+  padding: 22px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  min-height: 220px !important;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
-.download-btn:active {
-  transform: scale(0.98);
+.item-card:hover, #items-container > div:hover {
+  border-color: #cfb47a !important;
+  border-top-color: #d2ae45 !important;
+  box-shadow: 0 12px 24px rgba(15, 28, 46, 0.1) !important;
+  transform: translateY(-4px);
 }
 
-.delete-btn {
-  background-color: #fee2e2;
-  color: #b91c1c;
+.item-card h2, .item-card h3, #items-container > div h3 {
+  font-size: 20px !important;
+  color: #451660 !important;
+  margin-bottom: 10px !important;
+  font-family: 'Frank Ruhl Libre', serif;
+}
+
+.item-card p, #items-container > div p {
+  color: #655b68 !important;
+  font-size: 14px !important;
+  margin-bottom: 14px !important;
+  line-height: 1.5 !important;
+}
+
+/* כפתורי הורדה ומחיקה בתוך הכרטיס */
+.item-card button, .item-card a, 
+#items-container > div button, #items-container > div a {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 42px !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  margin-top: 6px !important;
+  cursor: pointer !important;
+  border: none !important;
+}
+
+/* כפתור הורדה כהה וקבוע */
+.item-card a, .download-btn, #items-container > div a {
+  background-color: #57237b !important;
+  color: #ffffff !important;
+}
+
+/* כפתור מחיקה בהיר */
+.delete-btn, #items-container > div button {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+  height: 36px !important;
+}
+
+.no-items {
+  grid-column: 1 / -1;
+  padding: 44px 20px;
+  border: 1px dashed #b8cbc8;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.65);
+  color: #64748b;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  header, nav, .navbar {
+    padding: 14px 18px !important;
+  }
+
+  .user-info span {
+    display: none;
+  }
+
+  .welcome-section {
+    min-height: 220px;
+    padding: 28px 24px;
+  }
+
+  .hero-book {
+    position: absolute;
+    left: 22px;
+    bottom: 20px;
+    width: 64px;
+    height: 64px;
+    font-size: 30px;
+  }
+
+  .main-nav {
+    display: none;
+  }
+
+  .upload-form {
+    grid-template-columns: 1fr;
+  }
 }

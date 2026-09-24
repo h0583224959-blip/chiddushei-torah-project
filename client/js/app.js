@@ -44,7 +44,12 @@ function renderItems(items) {
 function setupSearch(items) {
   allItems = items;
   const searchInput = document.getElementById('search-input');
+  const searchForm = document.getElementById('search-form');
   if (!searchInput) return;
+
+  if (searchForm) {
+    searchForm.addEventListener('submit', (event) => event.preventDefault());
+  }
 
   searchInput.addEventListener('input', (event) => {
     const searchTerm = event.target.value.trim().toLowerCase();

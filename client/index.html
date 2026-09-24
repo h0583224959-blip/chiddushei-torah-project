@@ -9,20 +9,56 @@
 <body>
 
   <header class="navbar">
-    <div class="logo">מאגר פריטים</div>
+    <div class="brand-lockup">
+      <div class="brand-mark" aria-hidden="true">ת</div>
+      <div>
+        <div class="logo">אוצר החידושים</div>
+        <div class="brand-subtitle">בית מדרש דיגיטלי</div>
+      </div>
+    </div>
+    <nav class="main-nav" aria-label="ניווט ראשי">
+      <a href="#home">ראשי</a>
+      <a href="#items-section">החידושים שלי</a>
+      <a href="#upload-form" class="admin-only">הוספת חידוש</a>
+    </nav>
     <div class="user-info">
       <span id="userNameDisplay">שלום, משתמש</span>
       <a href="login.html" id="authActionBtn" class="btn logout-btn">כניסה</a>
     </div>
   </header>
 
-  <main class="main-content">
-    <section class="search-section">
-      <input type="text" id="search-input" class="search-input" placeholder="חיפוש לפי כותרת או מחבר...">
+  <main id="home" class="main-content">
+    <section class="welcome-section">
+      <div>
+        <span class="eyebrow">אוצר של תורה</span>
+        <h1>מילים של תורה,<br><em>רעיונות שנשארים.</em></h1>
+        <p>מאגר אישי לחידושי תורה, שיעורים וחוברות במקום אחד.</p>
+      </div>
+      <div class="hero-book" aria-hidden="true">
+        <span>אוצר<br>החידושים</span>
+      </div>
+    </section>
+
+    <section class="search-section" aria-label="חיפוש פריטים">
+      <div class="search-heading">
+        <span class="search-icon" aria-hidden="true">⌕</span>
+        <div>
+          <h1>חיפוש במאגר</h1>
+          <p>מצאי פריט לפי כותרת או שם המחבר</p>
+        </div>
+      </div>
+      <form id="search-form" class="search-form">
+        <input type="search" id="search-input" class="search-input" placeholder="חיפוש לפי כותרת או מחבר..." aria-label="חיפוש לפי כותרת או מחבר">
+        <button type="submit" class="search-btn">חיפוש</button>
+      </form>
     </section>
 
     <!-- טופס העלאת פריט -->
     <section class="upload-section admin-only">
+      <div class="section-title">
+        <span class="section-kicker">ניהול המאגר</span>
+        <h2>הוספת חידוש חדש</h2>
+      </div>
       <form class="upload-form" id="upload-form">
         <div class="form-group">
           <label for="title">כותרת:</label>
@@ -45,7 +81,16 @@
     </section>
 
     <!-- מיכל כרטיסי הפריטים -->
-    <section id="items-container" class="items-grid"></section>
+    <section id="items-section" class="library-section">
+      <div class="library-heading">
+        <div>
+          <span class="section-kicker">הספרייה שלך</span>
+          <h2>החידושים במאגר</h2>
+        </div>
+        <span class="library-rule" aria-hidden="true"></span>
+      </div>
+      <div id="items-container" class="items-grid"></div>
+    </section>
   </main>
 
   <script src="js/api.js"></script>
