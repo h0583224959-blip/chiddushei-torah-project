@@ -47,13 +47,8 @@ function setupSearch(items) {
   const searchForm = document.getElementById('search-form');
   if (!searchInput) return;
 
-  if (searchForm) {
-    searchForm.addEventListener('submit', (event) => event.preventDefault());
-  }
-
-  searchInput.addEventListener('input', (event) => {
-    const searchTerm = event.target.value.trim().toLowerCase();
-
+  const filterItems = () => {
+    const searchTerm = searchInput.value.trim().toLowerCase();
     const filtered = allItems.filter((item) => {
       const matchTitle = item.title && item.title.toLowerCase().includes(searchTerm);
       const matchAuthor = item.author && item.author.toLowerCase().includes(searchTerm);
@@ -61,6 +56,12 @@ function setupSearch(items) {
     });
 
     renderItems(filtered);
+  };
+
+  searchInput.addEventListener('input', filterItems);
+  searchForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    filterItems();
   });
 }
 
