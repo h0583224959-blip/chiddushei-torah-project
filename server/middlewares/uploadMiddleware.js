@@ -33,9 +33,10 @@ const isAllowedMime =
 
   if (isAllowedExt || isAllowedMime) {
     return cb(null, true);
-  } else {
-cb(new Error('שגיאה: ניתן להעלות קובצי תמונה, שמע, וידאו או מסמכים בלבד!'));};
-
+} else {
+    cb(new Error('שגיאה: ניתן להעלות קובצי תמונה, שמע, וידאו או מסמכים בלבד!'));
+  }
+};
 const upload = multer({
   storage: storage,
   limits: { fileSize: 20 * 1024 * 1024 }, // עד 20MB
