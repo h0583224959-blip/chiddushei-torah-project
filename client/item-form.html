@@ -40,6 +40,13 @@
         <button type="submit" class="save-btn">שמירה</button>
       </div>
     </form>
+
+    <script>
+      upload.fields([
+        { name: 'file', maxCount: 1 },
+        { name: 'audio', maxCount: 1 }
+      ])
+    </script>
   </main>
 
   <script src="js/item-form.js"></script>
