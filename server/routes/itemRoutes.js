@@ -20,7 +20,10 @@ router.get('/:id/download', downloadItemFile);
 router.get('/:id', getItemById);
 
 // נתיב ליצירת פריט חדש כולל העלאת קובץ
-router.post('/', protect, admin, upload.single('audio'), createItem);
+router.post('/', protect, admin, upload.fields([
+    { name: 'file', maxCount: 1 },
+    { name: 'audio', maxCount: 1 }
+]), createItem);
 
 // נתיב לעדכון פריט
 router.put('/:id', protect, admin, updateItem);

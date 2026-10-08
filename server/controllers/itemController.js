@@ -8,9 +8,9 @@ const path = require('path');
 const getItems = async (req, res) => {
   try {
     const items = await Item.find().sort({ createdAt: -1 });
-    res.status(200).json(items);
+    return res.status(200).json(items);
   } catch (error) {
-    res.status(500).json({ message: 'שגיאה בשליפת הפריטים', error: error.message });
+    return res.status(500).json({ message: 'שגיאה בשליפת הפריטים', error: error.message });
   }
 };
 
@@ -25,9 +25,9 @@ const getItemById = async (req, res) => {
       return res.status(404).json({ message: 'הפריט לא נמצא' });
     }
 
-    res.status(200).json(item);
+    return res.status(200).json(item);
   } catch (error) {
-    res.status(500).json({ message: 'שגיאה בשליפת הפריט', error: error.message });
+    return res.status(500).json({ message: 'שגיאה בשליפת הפריט', error: error.message });
   }
 };
 
@@ -61,9 +61,7 @@ const downloadItemFile = async (req, res) => {
     const filePath = path.join(__dirname, '..', 'uploads', fileName);
 
     if (!fs.existsSync(filePath)) {
-      return res.status(404).json({
-        message: 'הקובץ המקורי אינו נמצא בתיקיית ההעלאות. יש להעלות אותו מחדש.',
-      });
+      return res.status(404).json({ message: 'הקובץ המקורי אינו נמצא בתיקיית ההעלאות.' });
     }
 
     return res.download(filePath, item.originalFileName || fileName);
@@ -78,40 +76,35 @@ const downloadItemFile = async (req, res) => {
 
 const createItem = async (req, res) => {
   try {
-    console.log('נתוני הקובץ שהתקבל:', req.file);
-console.log('נתוני הגוף:', req.body);
-    const { title, author, description, coverImage } = req.body;
+    const { title, author, description } = req.body;
+    const uploadedFile = req.file || req.files?.file?.[0] || req.files?.audio?.[0];
 
-    // בדיקת תקינות העלאת הקובץ
-    if (!req.file) {
+    if (!uploadedFile) {
       return res.status(400).json({ message: 'נא להעלות קובץ' });
     }
 
-    // בדיקת שדות חובה בטופס
     if (!title || !author) {
       return res.status(400).json({ message: 'נא למלא את כל שדות החובה: כותרת ומחבר' });
     }
 
-    // שמירת הקישור הישיר מהענן (Cloudinary)
-    const fileUrl = req.file.path;
+    const fileUrl = uploadedFile.path || uploadedFile.secure_url || uploadedFile.url;
+    const mimeType = uploadedFile.mimetype || uploadedFile.mimeType || 'application/octet-stream';
 
-    // יצירת המסמך במסד הנתונים
     const newItem = await Item.create({
       title,
       author,
       description,
       fileUrl,
-      originalFileName: req.file.originalname,
-      fileMimeType: req.file.mimetype,
-      fileFormat: req.file.format,
-      coverImage,
-      user: req.user ? req.user._id : null,
+      originalFileName: uploadedFile.originalname || uploadedFile.original_name,
+      fileMimeType: mimeType,
+      fileFormat: mimeType,
+      createdBy: req.user ? req.user._id : null,
     });
 
-res.status(201).json(newItem);
+    return res.status(201).json(newItem);
   } catch (error) {
-    console.error('פירוט השגיאה המלאה בשרת:', error);
-    res.status(500).json({ message: 'שגיאה ביצירת הפריט', error: error.message });
+    console.error('שגיאה ביצירת הפריט:', error);
+    return res.status(500).json({ message: 'שגיאה ביצירת הפריט', error: error.message });
   }
 };
 
@@ -130,9 +123,9 @@ const updateItem = async (req, res) => {
       return res.status(404).json({ message: 'הפריט לא נמצא לעדכון' });
     }
 
-    res.status(200).json(updatedItem);
+    return res.status(200).json(updatedItem);
   } catch (error) {
-    res.status(500).json({ message: 'שגיאה בעדכון הפריט', error: error.message });
+    return res.status(500).json({ message: 'שגיאה בעדכון הפריט', error: error.message });
   }
 };
 
@@ -147,9 +140,9 @@ const deleteItem = async (req, res) => {
       return res.status(404).json({ message: 'הפריט לא נמצא למחיקה' });
     }
 
-    res.status(200).json({ message: 'הפריט נמחק בהצלחה', id: req.params.id });
+    return res.status(200).json({ message: 'הפריט נמחק בהצלחה', id: req.params.id });
   } catch (error) {
-    res.status(500).json({ message: 'שגיאה במחיקת הפריט', error: error.message });
+    return res.status(500).json({ message: 'שגיאה במחיקת הפריט', error: error.message });
   }
 };
 

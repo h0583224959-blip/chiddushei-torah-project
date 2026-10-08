@@ -1,16 +1,14 @@
-// מערך גלובלי לשמירת הפריטים המקוריים לצורך סינון בחיפוש
 let allItems = [];
 
-// ============================================================
-// פונקציה 1: הצגת הפריטים על המסך (renderItems)
-// ============================================================
+window.API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000/api';
+
 function renderItems(items) {
   const container = document.getElementById('items-container');
   if (!container) return;
 
   container.innerHTML = '';
 
-  if (items.length === 0) {
+  if (!items || items.length === 0) {
     container.innerHTML = '<p class="no-items">לא נמצאו פריטים להצגה.</p>';
     return;
   }
@@ -21,15 +19,16 @@ function renderItems(items) {
     const card = document.createElement('div');
     card.className = 'item-card';
 
-    // יצירת מבנה הכרטיס עם כותרת, מחבר וכפתור הורדה
     card.innerHTML = `
       <h3>${item.title}</h3>
       <p class="author">מאת: ${item.author}</p>
       ${item.description ? `<p class="desc">${item.description}</p>` : ''}
-      <button type="button" class="btn download-btn" onclick="triggerDownload('${item._id}', '${item.title}')">הורדת קובץ</button>
+      <button type="button" class="btn download-btn" onclick="triggerDownload('${item._id || item.id}', '${item.title}')">
+        הורדת קובץ
+      </button>
       ${
         role === 'admin'
-          ? `<button class="btn delete-btn" onclick="handleDeleteItem('${item._id}')">מחיקה</button>`
+          ? `<button class="btn delete-btn" onclick="handleDeleteItem('${item._id || item.id}')">מחיקה</button>`
           : ''
       }
     `;
@@ -38,17 +37,17 @@ function renderItems(items) {
   });
 }
 
-// ============================================================
-// פונקציה 2: סינון וחיפוש פריטים בזמן אמת (setupSearch)
-// ============================================================
 function setupSearch(items) {
   allItems = items;
+
   const searchInput = document.getElementById('search-input');
   const searchForm = document.getElementById('search-form');
+
   if (!searchInput) return;
 
   const filterItems = () => {
     const searchTerm = searchInput.value.trim().toLowerCase();
+
     const filtered = allItems.filter((item) => {
       const matchTitle = item.title && item.title.toLowerCase().includes(searchTerm);
       const matchAuthor = item.author && item.author.toLowerCase().includes(searchTerm);
@@ -59,15 +58,15 @@ function setupSearch(items) {
   };
 
   searchInput.addEventListener('input', filterItems);
-  searchForm?.addEventListener('submit', (event) => {
-    event.preventDefault();
-    filterItems();
-  });
+
+  if (searchForm) {
+    searchForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      filterItems();
+    });
+  }
 }
 
-// ============================================================
-// פונקציה 3: טיפול בטופס הוספת פריט (handleFormSubmit)
-// ============================================================
 async function handleFormSubmit(event) {
   event.preventDefault();
 
@@ -75,13 +74,11 @@ async function handleFormSubmit(event) {
   const formData = new FormData(form);
 
   try {
-    // קריאה לפונקציה createItem שנמצאת בקובץ api.js של השותפה
     await createItem(formData);
 
     alert('הפריט נוסף בהצלחה!');
     form.reset();
 
-    // רענון רשימת הפריטים מחדש מהשרת
     const updatedItems = await getItems();
     allItems = updatedItems;
     renderItems(updatedItems);
@@ -90,47 +87,38 @@ async function handleFormSubmit(event) {
   }
 }
 
-// ============================================================
-// פונקציה 4: ניהול תצוגת הרשאות מנהל (checkAdminState)
-// ============================================================
 function checkAdminState() {
   const role = localStorage.getItem('role');
   const adminElements = document.querySelectorAll('.admin-only');
 
   adminElements.forEach((el) => {
-    if (role === 'admin') {
-      el.style.display = ''; // מציג את האלמנט
-    } else {
-      el.style.display = 'none'; // מסתיר מהמשתמש הרגיל
-    }
+    el.style.display = role === 'admin' ? '' : 'none';
   });
 }
 
-// פונקציית עזר למחיקת פריט בלחיצה על כפתור המחיקה
 async function handleDeleteItem(id) {
   if (!confirm('האם את בטוחה שברצונך למחוק פריט זה?')) return;
 
   try {
     await deleteItem(id);
-    allItems = allItems.filter((item) => item._id !== id);
+    allItems = allItems.filter((item) => (item._id || item.id) !== id);
     renderItems(allItems);
   } catch (error) {
     alert('שגיאה במחיקת הפריט: ' + error.message);
   }
 }
 
-// ============================================================
-// הפעלה אוטומטית ברגע שהדף נטען
-// ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. עדכון כפתור כניסה/יציאה ושם המשתמש בסרגל העליון
   const authBtn = document.getElementById('authActionBtn');
   const userNameDisplay = document.getElementById('userNameDisplay');
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
 
   if (token) {
-    if (userNameDisplay) userNameDisplay.textContent = `שלום, ${role === 'admin' ? 'מנהל' : 'משתמש'}`;
+    if (userNameDisplay) {
+      userNameDisplay.textContent = `שלום, ${role === 'admin' ? 'מנהל' : 'משתמש'}`;
+    }
+
     if (authBtn) {
       authBtn.textContent = 'התנתקות';
       authBtn.href = '#';
@@ -142,16 +130,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // 2. בדיקת הרשאות מנהל ועדכון תצוגה
   checkAdminState();
 
-  // 3. האזנה לשליחת טופס ההוספה (אם קיים בדף)
   const uploadForm = document.getElementById('upload-form');
   if (uploadForm) {
     uploadForm.addEventListener('submit', handleFormSubmit);
   }
 
-  // 4. טעינת הפריטים הראשונית מהשרת
   try {
     if (typeof getItems === 'function') {
       const items = await getItems();
@@ -163,55 +148,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// ============================================================
-// פונקציית הורדת קובץ
-// ============================================================
-function extensionForMimeType(mimeType) {
-const extensions = {
-  'audio/mpeg': 'mp3',
-  'audio/mp3': 'mp3',
-  'video/mp4': 'mp4',
-  'video/quicktime': 'mov',
-  'audio/mp4': 'm4a',
-  'audio/wav': 'wav',
-  'audio/x-wav': 'wav',
-  'audio/ogg': 'ogg',
-  'audio/aac': 'aac',
-  'image/jpeg': 'jpg',
-  'image/png': 'png',
-  'image/gif': 'gif',
-  'image/webp': 'webp',
-  'application/pdf': 'pdf'
-};
-
-  return extensions[mimeType] || '';
-}
-
 function getFileExtension(fileName) {
   const match = fileName && fileName.match(/\.([a-z0-9]+)$/i);
   return match ? match[1].toLowerCase() : '';
 }
 
-function getHeaderFileName(contentDisposition) {
-  if (!contentDisposition) return '';
-
-  const match = contentDisposition.match(/filename\*?=(?:UTF-8''|\")?([^\";]+)/i);
-  return match ? decodeURIComponent(match[1].trim()) : '';
-}
-
 async function triggerDownload(itemId, title) {
   try {
-    // איתור הפריט מתוך רשימת הפריטים הקיימת בדף
-    const item = allItems.find(i => (i._id || i.id) === itemId);
+    const item = allItems.find((i) => (i._id || i.id) === itemId);
     const fileUrl = item ? (item.fileUrl || item.file) : null;
 
     if (!fileUrl) {
-      // אם לא נמצא ישירות, ננסה דרך השרת
-      window.open(`http://localhost:5000/api/items/${encodeURIComponent(itemId)}/download`, '_blank');
+      const downloadUrl = `${window.API_BASE_URL.replace(/\/api$/, '')}/api/items/${encodeURIComponent(itemId)}/download`;
+      window.open(downloadUrl, '_blank');
       return;
     }
 
-    // יצירת קישור להורדה ישירה מכל מחשב
     const a = document.createElement('a');
     a.href = fileUrl;
     a.target = '_blank';
