@@ -32,15 +32,18 @@ async function getItems() {
  */
 async function createItem(formData) {
   try {
+    const token = localStorage.getItem('token');
     // שליחת בקשת POST עם הנתונים והקובץ
     const response = await fetch(`${BASE_URL}/items`, {
       method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData // הדפדפן מוסיף לבד את הכותרות המתאימות לקובץ
     });
     
     // בדיקה האם היצירה הצליחה
     if (!response.ok) {
-      throw new Error('שגיאה ביצירת הפריט ושמירתו');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `שגיאה ביצירת הפריט (HTTP ${response.status})`);
     }
     
     // החזרת הנתונים של הפריט החדש שנשמר
@@ -59,9 +62,11 @@ async function createItem(formData) {
  */
 async function deleteItem(id) {
   try {
+    const token = localStorage.getItem('token');
     // שליחת בקשת מחיקה עם ה-id בנתיב
     const response = await fetch(`${BASE_URL}/items/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
     
     // בדיקה האם המחיקה עברה בהצלחה
@@ -102,7 +107,7 @@ async function login(email, password) {
     // שמירת מזהה ההתחברות וההרשאה בזיכרון המקומי של הדפדפן
     if (data.token) {
       localStorage.setItem('token', data.token);
-      localStorage.setItem('role', data.role || 'user');
+      localStorage.setItem('role', data.user?.role || data.role || 'user');
     }
     
     return data;

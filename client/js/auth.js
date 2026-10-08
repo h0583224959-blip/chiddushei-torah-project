@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // שמירת הטוקן ותפקיד המשתמש בזיכרון המקומי של הדפדפן
         if (data.token) {
           localStorage.setItem('token', data.token);
-          localStorage.setItem('role', data.role || 'user');
+          localStorage.setItem('role', data.user?.role || data.role || 'user');
         }
       }
 

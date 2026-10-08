@@ -26,7 +26,7 @@ function renderItems(items) {
       <h3>${item.title}</h3>
       <p class="author">מאת: ${item.author}</p>
       ${item.description ? `<p class="desc">${item.description}</p>` : ''}
-      <button type="button" class="btn download-btn" onclick="triggerDownload('${item.fileUrl}', '${item.title}')">הורדת קובץ</button>
+      <button type="button" class="btn download-btn" onclick="triggerDownload('${item._id}', '${item.title}')">הורדת קובץ</button>
       ${
         role === 'admin'
           ? `<button class="btn delete-btn" onclick="handleDeleteItem('${item._id}')">מחיקה</button>`
@@ -165,16 +165,57 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ============================================================
 // פונקציית הורדת קובץ
 // ============================================================
-async function triggerDownload(url, title) {
+function extensionForMimeType(mimeType) {
+  const extensions = {
+    'application/pdf': 'pdf',
+    'audio/mpeg': 'mp3',
+    'audio/mp4': 'm4a',
+    'audio/wav': 'wav',
+    'audio/x-wav': 'wav',
+    'audio/ogg': 'ogg',
+    'audio/aac': 'aac',
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/gif': 'gif',
+    'image/webp': 'webp',
+  };
+
+  return extensions[mimeType] || '';
+}
+
+function getFileExtension(fileName) {
+  const match = fileName && fileName.match(/\.([a-z0-9]+)$/i);
+  return match ? match[1].toLowerCase() : '';
+}
+
+function getHeaderFileName(contentDisposition) {
+  if (!contentDisposition) return '';
+
+  const match = contentDisposition.match(/filename\*?=(?:UTF-8''|\")?([^\";]+)/i);
+  return match ? decodeURIComponent(match[1].trim()) : '';
+}
+
+async function triggerDownload(itemId, title) {
   try {
-    const response = await fetch(url);
+    const response = await fetch(`http://localhost:5000/api/items/${encodeURIComponent(itemId)}/download`);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `השרת החזיר שגיאה ${response.status}`);
+    }
+
     const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = downloadUrl;
 
-    const extension = url.split('.').pop();
-    a.download = `${title || 'file'}.${extension}`;
+    const responseMimeType = response.headers.get('content-type')?.split(';')[0];
+    const responseFileName = getHeaderFileName(response.headers.get('content-disposition'));
+    const extension =
+      getFileExtension(responseFileName) ||
+      extensionForMimeType(responseMimeType) ||
+      'file';
+    const safeTitle = (title || 'file').replace(/[\\/:*?"<>|]/g, '-');
+    a.download = `${safeTitle}.${extension}`;
 
     document.body.appendChild(a);
     a.click();
@@ -182,6 +223,6 @@ async function triggerDownload(url, title) {
     window.URL.revokeObjectURL(downloadUrl);
   } catch (error) {
     console.error('שגיאה בהורדת הקובץ:', error);
-    alert('שגיאה בהורדת הקובץ');
+    alert(`שגיאה בהורדת הקובץ: ${error.message}`);
   }
 }

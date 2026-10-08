@@ -1,12 +1,24 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { timingSafeEqual } = require('crypto');
+
+const configuredAdmins = () => [1, 2].map((number) => ({
+  email: (process.env[`ADMIN_EMAIL_${number}`] || '').trim().toLowerCase(),
+  password: process.env[`ADMIN_PASSWORD_${number}`] || ''
+})).filter((admin) => admin.email);
+
+const matchesSecret = (provided, expected) => {
+  const providedBuffer = Buffer.from(provided);
+  const expectedBuffer = Buffer.from(expected);
+  return providedBuffer.length === expectedBuffer.length && timingSafeEqual(providedBuffer, expectedBuffer);
+};
 
 // פונקציית רישום משתמש חדש
 exports.register = async (req, res) => {
   try {
     // 1. קליטת הנתונים שהמשתמש שלח בטופס
-    const { username, email, password, role } = req.body;
+    const { username, email, password } = req.body;
 
     // 2. בדיקה שכל שדות החובה מולאו
     if (!username || !email || !password) {
@@ -28,7 +40,7 @@ exports.register = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      role: role || 'user'
+      role: 'user'
     });
 
     // 6. החזרת תשובה מוצלחת ללקוח (ללא החזרת הסיסמה)
@@ -52,22 +64,47 @@ exports.login = async (req, res) => {
   try {
     // 1. קבלת פרטי ההתחברות מהטופס
     const { email, password } = req.body;
+    const normalizedEmail = (email || '').trim().toLowerCase();
 
     // 2. בדיקה שהוזנו אימייל וסיסמה
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res.status(400).json({ message: 'נא למלא אימייל וסיסמה' });
     }
 
-    // 3. חיפוש המשתמש במסד הנתונים לפי האימייל
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'פרטי התחברות שגויים' });
-    }
+    const adminCredentials = configuredAdmins();
+    const adminAccount = adminCredentials.find((admin) => admin.email === normalizedEmail);
+    let user;
 
-    // 4. השוואת הסיסמה שהוקלדה לסיסמה המוצפנת במסד הנתונים
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'פרטי התחברות שגויים' });
+    if (adminAccount) {
+      if (!adminAccount.password || !matchesSecret(password, adminAccount.password)) {
+        return res.status(400).json({ message: 'פרטי התחברות שגויים' });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, await bcrypt.genSalt(10));
+      user = await User.findOne({ email: normalizedEmail });
+      if (user) {
+        user.username = user.username || normalizedEmail;
+        user.password = hashedPassword;
+        user.role = 'admin';
+        await user.save();
+      } else {
+        user = await User.create({
+          username: normalizedEmail,
+          email: normalizedEmail,
+          password: hashedPassword,
+          role: 'admin'
+        });
+      }
+    } else {
+      user = await User.findOne({ email: normalizedEmail });
+      if (!user || !(await bcrypt.compare(password, user.password))) {
+        return res.status(400).json({ message: 'פרטי התחברות שגויים' });
+      }
+
+      if (user.role === 'admin') {
+        user.role = 'user';
+        await user.save();
+      }
     }
 
     // 5. הפקת טוקן אימות (JWT) המכיל את מזהה המשתמש ותפקידו

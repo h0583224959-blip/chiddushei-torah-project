@@ -1,4 +1,6 @@
 const Item = require('../models/itemModel');
+const fs = require('fs');
+const path = require('path');
 
 // @desc    קבלת כל הפריטים מהמסד
 // @route   GET /api/items
@@ -26,6 +28,47 @@ const getItemById = async (req, res) => {
     res.status(200).json(item);
   } catch (error) {
     res.status(500).json({ message: 'שגיאה בשליפת הפריט', error: error.message });
+  }
+};
+
+const downloadItemFile = async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({ message: 'הפריט לא נמצא' });
+    }
+
+    if (!item.fileUrl) {
+      return res.status(404).json({ message: 'לקובץ אין כתובת שמורה' });
+    }
+
+    if (/^https?:\/\//i.test(item.fileUrl) && !item.fileUrl.includes('localhost')) {
+      const cloudResponse = await fetch(item.fileUrl);
+
+      if (!cloudResponse.ok || !cloudResponse.body) {
+        return res.status(502).json({ message: 'לא ניתן לקרוא את הקובץ מהענן' });
+      }
+
+      res.setHeader('Content-Type', item.fileMimeType || cloudResponse.headers.get('content-type') || 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(item.originalFileName || path.basename(new URL(item.fileUrl).pathname))}"`);
+
+      const { Readable } = require('stream');
+      return Readable.fromWeb(cloudResponse.body).pipe(res);
+    }
+
+    const fileName = path.basename(new URL(item.fileUrl, 'http://localhost').pathname);
+    const filePath = path.join(__dirname, '..', 'uploads', fileName);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        message: 'הקובץ המקורי אינו נמצא בתיקיית ההעלאות. יש להעלות אותו מחדש.',
+      });
+    }
+
+    return res.download(filePath, item.originalFileName || fileName);
+  } catch (error) {
+    return res.status(500).json({ message: 'שגיאה בהורדת הקובץ', error: error.message });
   }
 };
 
@@ -58,6 +101,9 @@ console.log('נתוני הגוף:', req.body);
       author,
       description,
       fileUrl,
+      originalFileName: req.file.originalname,
+      fileMimeType: req.file.mimetype,
+      fileFormat: req.file.format,
       coverImage,
       user: req.user ? req.user._id : null,
     });
@@ -110,6 +156,7 @@ const deleteItem = async (req, res) => {
 module.exports = {
   getItems,
   getItemById,
+  downloadItemFile,
   createItem,
   updateItem,
   deleteItem,

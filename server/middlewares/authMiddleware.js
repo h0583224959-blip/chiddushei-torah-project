@@ -15,7 +15,7 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
 
       // פענוח הטוקן באמצעות המפתח הסודי
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretKey123');
 
       // שליפת פרטי המשתמש ממסד הנתונים ללא שדה הסיסמה
       req.user = await User.findById(decoded.id).select('-password');
@@ -37,7 +37,15 @@ const protect = async (req, res, next) => {
 
 // 2. פונקציית בדיקת תפקיד: מוודאת שהמשתמש הוא מנהל (role === 'admin')
 const admin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+  const configuredEmails = [process.env.ADMIN_EMAIL_1, process.env.ADMIN_EMAIL_2]
+    .filter(Boolean)
+    .map((email) => email.trim().toLowerCase());
+
+  if (
+    req.user &&
+    req.user.role === 'admin' &&
+    configuredEmails.includes(req.user.email.toLowerCase())
+  ) {
     next(); // המשתמש מורשה כמנהל, ממשיכים
   } else {
     res.status(403).json({ message: 'גישה חסומה: מיועד למנהל מערכת בלבד' });
