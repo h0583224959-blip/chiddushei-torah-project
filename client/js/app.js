@@ -166,19 +166,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 // פונקציית הורדת קובץ
 // ============================================================
 function extensionForMimeType(mimeType) {
-  const extensions = {
-    'application/pdf': 'pdf',
-    'audio/mpeg': 'mp3',
-    'audio/mp4': 'm4a',
-    'audio/wav': 'wav',
-    'audio/x-wav': 'wav',
-    'audio/ogg': 'ogg',
-    'audio/aac': 'aac',
-    'image/jpeg': 'jpg',
-    'image/png': 'png',
-    'image/gif': 'gif',
-    'image/webp': 'webp',
-  };
+const extensions = {
+  'audio/mpeg': 'mp3',
+  'audio/mp3': 'mp3',
+  'video/mp4': 'mp4',
+  'video/quicktime': 'mov',
+  'audio/mp4': 'm4a',
+  'audio/wav': 'wav',
+  'audio/x-wav': 'wav',
+  'audio/ogg': 'ogg',
+  'audio/aac': 'aac',
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/gif': 'gif',
+  'image/webp': 'webp',
+  'application/pdf': 'pdf'
+};
 
   return extensions[mimeType] || '';
 }
@@ -197,30 +200,24 @@ function getHeaderFileName(contentDisposition) {
 
 async function triggerDownload(itemId, title) {
   try {
-    const response = await fetch(`http://localhost:5000/api/items/${encodeURIComponent(itemId)}/download`);
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `השרת החזיר שגיאה ${response.status}`);
+    // איתור הפריט מתוך רשימת הפריטים הקיימת בדף
+    const item = allItems.find(i => (i._id || i.id) === itemId);
+    const fileUrl = item ? (item.fileUrl || item.file) : null;
+
+    if (!fileUrl) {
+      // אם לא נמצא ישירות, ננסה דרך השרת
+      window.open(`http://localhost:5000/api/items/${encodeURIComponent(itemId)}/download`, '_blank');
+      return;
     }
 
-    const blob = await response.blob();
-    const downloadUrl = window.URL.createObjectURL(blob);
+    // יצירת קישור להורדה ישירה מכל מחשב
     const a = document.createElement('a');
-    a.href = downloadUrl;
-
-    const responseMimeType = response.headers.get('content-type')?.split(';')[0];
-    const responseFileName = getHeaderFileName(response.headers.get('content-disposition'));
-    const extension =
-      getFileExtension(responseFileName) ||
-      extensionForMimeType(responseMimeType) ||
-      'file';
-    const safeTitle = (title || 'file').replace(/[\\/:*?"<>|]/g, '-');
-    a.download = `${safeTitle}.${extension}`;
-
+    a.href = fileUrl;
+    a.target = '_blank';
+    a.download = (title || 'קובץ') + (getFileExtension(fileUrl) ? '.' + getFileExtension(fileUrl) : '');
     document.body.appendChild(a);
     a.click();
     a.remove();
-    window.URL.revokeObjectURL(downloadUrl);
   } catch (error) {
     console.error('שגיאה בהורדת הקובץ:', error);
     alert(`שגיאה בהורדת הקובץ: ${error.message}`);

@@ -24,20 +24,17 @@ const storage = new CloudinaryStorage({
 // סינון סוגי קבצים מותרים
 const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
-  const allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'mp3', 'm4a', 'wav', 'ogg', 'aac', 'pdf'];
-
-  const isAllowedExt = allowedExtensions.includes(ext);
-  const isAllowedMime =
+const allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'mp3', 'm4a', 'wav', 'ogg', 'aac', 'pdf', 'mp4', 'mov', 'avi'];  const isAllowedExt = allowedExtensions.includes(ext);
+const isAllowedMime = 
     file.mimetype.startsWith('image/') ||
     file.mimetype.startsWith('audio/') ||
+    file.mimetype.startsWith('video/') ||
     file.mimetype === 'application/pdf';
 
   if (isAllowedExt || isAllowedMime) {
     return cb(null, true);
   } else {
-    cb(new Error('שגיאה: ניתן להעלות קובצי שמע, תמונה או PDF בלבד!'));
-  }
-};
+cb(new Error('שגיאה: ניתן להעלות קובצי תמונה, שמע, וידאו או מסמכים בלבד!'));};
 
 const upload = multer({
   storage: storage,
