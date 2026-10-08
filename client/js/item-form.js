@@ -28,25 +28,39 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('title', title);
     formData.append('author', author);
     formData.append('description', description);
-    formData.append('audio', fileInput.files[0]); // שליחת הקובץ עצמו
+    
+    // שליחת הקובץ תחת השם 'file' (תואם להגדרת ה-multer בשרת)
+    formData.append('file', fileInput.files[0]);
+
+    // שליפת טוקן ההתחברות של המשתמשת
+    const token = localStorage.getItem('token');
 
     try {
-      // אם הפונקציה createItem מוגדרת ב-api.js, נשתמש בה
+      // אם מוגדרת פונקציה מסודרת ב-api.js
       if (typeof createItem === 'function') {
         await createItem(formData);
       } else {
-        // גיבוי: שליחה ישירה לשרת אם api.js לא נטען
-        const response = await fetch('http://localhost:5000/api/items', {
+        // שליחה ישירה לשרת
+        const baseUrl = window.API_BASE_URL || 'http://localhost:5000';
+        
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${baseUrl}/api/items`, {
           method: 'POST',
-          body: formData // בעבודה עם FormData הדפדפן מוסיף לבד את ה-Headers המתאימים
+          headers: headers,
+          body: formData
         });
 
         if (!response.ok) {
-          throw new Error('שגיאה בשמירת הפריט');
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.message || 'שגיאה בשמירת הפריט');
         }
       }
+
       alert('הפריט נשמר בהצלחה!');
-      // חזרה לדף הראשי לצפייה בפריט החדש ברשימה
       window.location.href = 'index.html';
     } catch (error) {
       console.error('שגיאה בשמירת הטופס:', error);
