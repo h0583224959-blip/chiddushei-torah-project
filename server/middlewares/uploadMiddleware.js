@@ -17,6 +17,9 @@ const storage = new CloudinaryStorage({
     return {
       folder: 'project_files',
       resource_type: 'auto',
+      access_mode: 'public',
+      public_id: `${Date.now()}-${file.originalname.replace(/\.[^/.]+$/, "")}`, // שם הקובץ ללא סיומת
+      format: path.extname(file.originalname).replace('.', ''), // שמירת הסיומת המקורית
     };
   },
 });
