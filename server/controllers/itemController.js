@@ -44,17 +44,16 @@ const downloadItemFile = async (req, res) => {
     }
 
     if (/^https?:\/\//i.test(item.fileUrl) && !item.fileUrl.includes('localhost')) {
-      const cloudResponse = await fetch(item.fileUrl);
+      const cloudinaryUrl = new URL(item.fileUrl);
+      const isTransformableCloudinaryAsset =
+        cloudinaryUrl.hostname === 'res.cloudinary.com' &&
+        /\/(image|video)\/upload\//.test(cloudinaryUrl.pathname);
 
-      if (!cloudResponse.ok || !cloudResponse.body) {
-        return res.status(502).json({ message: 'לא ניתן לקרוא את הקובץ מהענן' });
-      }
-
-      res.setHeader('Content-Type', item.fileMimeType || cloudResponse.headers.get('content-type') || 'application/octet-stream');
-      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(item.originalFileName || path.basename(new URL(item.fileUrl).pathname))}"`);
-
-      const { Readable } = require('stream');
-      return Readable.fromWeb(cloudResponse.body).pipe(res);
+      const downloadName = item.originalFileName || path.basename(cloudinaryUrl.pathname);
+      const downloadUrl = isTransformableCloudinaryAsset
+        ? item.fileUrl.replace('/upload/', `/upload/fl_attachment:${encodeURIComponent(downloadName)}/`)
+        : item.fileUrl;
+      return res.redirect(downloadUrl);
     }
 
     const fileName = path.basename(new URL(item.fileUrl, 'http://localhost').pathname);

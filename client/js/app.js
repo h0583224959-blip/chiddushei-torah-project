@@ -157,17 +157,14 @@ async function triggerDownload(itemId, title) {
   try {
     const item = allItems.find((i) => (i._id || i.id) === itemId);
     const fileUrl = item ? (item.fileUrl || item.file) : null;
-
-    if (!fileUrl) {
-      const downloadUrl = `${window.API_BASE_URL.replace(/\/api$/, '')}/api/items/${encodeURIComponent(itemId)}/download`;
-      window.open(downloadUrl, '_blank');
-      return;
-    }
+    const downloadUrl = `${window.API_BASE_URL.replace(/\/api$/, '')}/api/items/${encodeURIComponent(itemId)}/download`;
 
     const a = document.createElement('a');
-    a.href = fileUrl;
+    a.href = downloadUrl;
     a.target = '_blank';
-    a.download = (title || 'קובץ') + (getFileExtension(fileUrl) ? '.' + getFileExtension(fileUrl) : '');
+    a.rel = 'noopener noreferrer';
+    a.download = (title || 'קובץ') + (getFileExtension(fileUrl || '') ? '.' + getFileExtension(fileUrl || '') : '');
+
     document.body.appendChild(a);
     a.click();
     a.remove();
