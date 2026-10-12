@@ -25,7 +25,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 app.use('/api/users', userRoutes);
 app.use('/api/items', itemRoutes);
 
-// תופס שגיאות מרכזי (מדפיס שגיאות העלאה של Multer ו-Cloudinary)
+// תופס שגיאות מרכזי
 app.use((err, req, res, next) => {
   console.error('--- שגיאה שנתפסה בשרת ---');
   console.error(err);
@@ -50,9 +50,3 @@ mongoose.connect(MONGO_URI)
     console.error('שגיאה בחיבור למסד הנתונים ❌:', err.message);
   });
 
-// בדיקה של קובץ בשרת
-function fetchItemFile(item) {
-  return fetch(item.fileUrl)
-    .then(response => response.blob())
-    .catch(error => console.error('שגיאה בטעינת הקובץ:', error));
-}

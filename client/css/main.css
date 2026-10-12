@@ -435,7 +435,13 @@ form button[type="submit"]:hover {
   flex-direction: column !important;
   justify-content: space-between !important;
   min-height: 220px !important;
+  cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.item-card:focus-visible {
+  outline: 3px solid #57237b;
+  outline-offset: 3px;
 }
 
 .item-card:hover, #items-container > div:hover {
@@ -460,6 +466,12 @@ form button[type="submit"]:hover {
 }
 
 /* כפתורי הורדה ומחיקה בתוך הכרטיס */
+.item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
 .item-card button, .item-card a, 
 #items-container > div button, #items-container > div a {
   display: flex !important;
@@ -482,7 +494,7 @@ form button[type="submit"]:hover {
 }
 
 /* כפתור מחיקה בהיר */
-.delete-btn, #items-container > div button {
+.delete-btn, #items-container > div .delete-btn {
   background-color: #fee2e2 !important;
   color: #991b1b !important;
   height: 36px !important;
@@ -528,4 +540,9 @@ form button[type="submit"]:hover {
   .upload-form {
     grid-template-columns: 1fr;
   }
+}
+
+.item-actions .download-btn,
+.item-actions .delete-btn {
+  flex: 1;
 }

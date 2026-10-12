@@ -1,6 +1,7 @@
 const Item = require('../models/itemModel');
 const fs = require('fs');
 const path = require('path');
+const mime = require('mime-types');
 
 // @desc    קבלת כל הפריטים מהמסד
 // @route   GET /api/items
@@ -31,6 +32,45 @@ const getItemById = async (req, res) => {
   }
 };
 
+const openItemFile = async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({ message: 'הפריט לא נמצא' });
+    }
+
+    if (!item.fileUrl) {
+      return res.status(404).json({ message: 'לקובץ אין כתובת שמורה' });
+    }
+
+    if (/^https?:\/\//i.test(item.fileUrl) && !item.fileUrl.includes('localhost')) {
+      return res.status(410).json({
+        message: 'הקובץ שמור בכתובת חיצונית. יש להשיג את הקובץ המקורי ולהעלות אותו מחדש.',
+      });
+    }
+
+    const normalizedFileUrl = item.fileUrl || '';
+    const fileName = path.basename(
+      normalizedFileUrl.startsWith('/uploads/')
+        ? normalizedFileUrl
+        : new URL(normalizedFileUrl, 'http://localhost').pathname
+    );
+    const filePath = path.join(__dirname, '..', 'uploads', fileName);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'הקובץ המקורי אינו נמצא בתיקיית ההעלאות.' });
+    }
+
+    const originalFileName = item.originalFileName || fileName;
+    res.setHeader('Content-Type', item.fileMimeType || mime.lookup(filePath) || 'application/octet-stream');
+    res.setHeader('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(originalFileName)}`);
+    return res.sendFile(filePath);
+  } catch (error) {
+    return res.status(500).json({ message: 'שגיאה בפתיחת הקובץ', error: error.message });
+  }
+};
+
 const downloadItemFile = async (req, res) => {
   try {
     const item = await Item.findById(req.params.id);
@@ -43,14 +83,18 @@ const downloadItemFile = async (req, res) => {
       return res.status(404).json({ message: 'לקובץ אין כתובת שמורה' });
     }
 
-    const normalizedFileUrl = item.fileUrl || '';
-    const isRemoteHttp = /^https?:\/\//i.test(normalizedFileUrl) && !normalizedFileUrl.includes('localhost');
-
-    if (isRemoteHttp) {
-      return res.redirect(normalizedFileUrl);
+    if (/^https?:\/\//i.test(item.fileUrl) && !item.fileUrl.includes('localhost')) {
+      return res.status(410).json({
+        message: 'הקובץ שמור בכתובת חיצונית. יש להשיג את הקובץ המקורי ולהעלות אותו מחדש.',
+      });
     }
 
-    const fileName = path.basename(normalizedFileUrl.startsWith('/uploads/') ? normalizedFileUrl : new URL(normalizedFileUrl, 'http://localhost').pathname);
+    const normalizedFileUrl = item.fileUrl || '';
+    const fileName = path.basename(
+      normalizedFileUrl.startsWith('/uploads/')
+        ? normalizedFileUrl
+        : new URL(normalizedFileUrl, 'http://localhost').pathname
+    );
     const filePath = path.join(__dirname, '..', 'uploads', fileName);
 
     if (!fs.existsSync(filePath)) {
@@ -66,15 +110,17 @@ const downloadItemFile = async (req, res) => {
 // @desc    יצירת פריט חדש
 // @route   POST /api/items
 // @access  Public
-
 const createItem = async (req, res) => {
   try {
     const { title, author, description } = req.body;
     const uploadedFile = req.file || req.files?.file?.[0] || req.files?.audio?.[0];
-    
 
     if (!uploadedFile) {
       return res.status(400).json({ message: 'נא להעלות קובץ' });
+    }
+
+    if (!uploadedFile.path) {
+      return res.status(400).json({ message: 'הקובץ לא נשמר בתיקיית ההעלאות המקומית' });
     }
 
     if (!title || !author) {
@@ -144,6 +190,7 @@ const deleteItem = async (req, res) => {
 module.exports = {
   getItems,
   getItemById,
+  openItemFile,
   downloadItemFile,
   createItem,
   updateItem,

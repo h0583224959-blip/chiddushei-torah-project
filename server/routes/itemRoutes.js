@@ -3,6 +3,7 @@ const router = express.Router();
 const {
     getItems,
     getItemById,
+    openItemFile,
     downloadItemFile,
     createItem,
     updateItem,
@@ -13,6 +14,8 @@ const { protect, admin } = require('../middlewares/authMiddleware');
 
 // נתיב לקבלת כל הפריטים
 router.get('/', getItems);
+
+router.get('/:id/open', openItemFile);
 
 router.get('/:id/download', downloadItemFile);
 
