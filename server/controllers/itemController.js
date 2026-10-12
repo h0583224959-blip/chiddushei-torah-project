@@ -1,6 +1,7 @@
 const Item = require('../models/itemModel');
 const fs = require('fs');
 const path = require('path');
+const mime = require('mime-types');
 const multer = require('multer');
 
 const storage = multer.diskStorage({
@@ -52,6 +53,38 @@ const getItemById = async (req, res) => {
   }
 };
 
+const openItemFile = async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({ message: 'הפריט לא נמצא' });
+    }
+
+    if (!item.fileUrl) {
+      return res.status(404).json({ message: 'לקובץ אין כתובת שמורה' });
+    }
+
+    if (/^https?:\/\//i.test(item.fileUrl) && !item.fileUrl.includes('localhost')) {
+      return res.redirect(item.fileUrl);
+    }
+
+    const fileName = path.basename(new URL(item.fileUrl, 'http://localhost').pathname);
+    const filePath = path.join(__dirname, '..', 'uploads', fileName);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'הקובץ המקורי אינו נמצא בתיקיית ההעלאות.' });
+    }
+
+    const originalFileName = item.originalFileName || fileName;
+    res.setHeader('Content-Type', item.fileMimeType || mime.lookup(filePath) || 'application/octet-stream');
+    res.setHeader('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(originalFileName)}`);
+    return res.sendFile(filePath);
+  } catch (error) {
+    return res.status(500).json({ message: 'שגיאה בפתיחת הקובץ', error: error.message });
+  }
+};
+
 const downloadItemFile = async (req, res) => {
   try {
     const item = await Item.findById(req.params.id);
@@ -66,16 +99,23 @@ const downloadItemFile = async (req, res) => {
 
     if (/^https?:\/\//i.test(item.fileUrl) && !item.fileUrl.includes('localhost')) {
       const cloudinaryUrl = new URL(item.fileUrl);
-      const isTransformableCloudinaryAsset =
-        cloudinaryUrl.hostname === 'res.cloudinary.com' &&
-        /\/(image|video)\/upload\//.test(cloudinaryUrl.pathname);
+      if (cloudinaryUrl.hostname === 'res.cloudinary.com') {
+        const cloudinaryResponse = await fetch(cloudinaryUrl);
 
-      const downloadName = item.originalFileName || path.basename(cloudinaryUrl.pathname);
-      const encodedAttachmentName = encodeURIComponent(downloadName).replace(/\./g, '%2E');
-      const downloadUrl = isTransformableCloudinaryAsset
-        ? item.fileUrl.replace('/upload/', `/upload/fl_attachment:${encodedAttachmentName}/`)
-        : item.fileUrl;
-      return res.redirect(downloadUrl);
+        if (!cloudinaryResponse.ok) {
+          return res.status(502).json({
+            message: 'Cloudinary לא אפשר להוריד את הקובץ',
+            cloudinaryStatus: cloudinaryResponse.status,
+          });
+        }
+
+        const downloadName = item.originalFileName || path.basename(cloudinaryUrl.pathname);
+        res.setHeader('Content-Type', item.fileMimeType || cloudinaryResponse.headers.get('content-type') || mime.lookup(downloadName) || 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(downloadName)}`);
+        return res.send(Buffer.from(await cloudinaryResponse.arrayBuffer()));
+      }
+
+      return res.redirect(item.fileUrl);
     }
 
     if (item.fileUrl.startsWith('/uploads/')) {
@@ -187,6 +227,7 @@ const deleteItem = async (req, res) => {
 module.exports = {
   getItems,
   getItemById,
+  openItemFile,
   downloadItemFile,
   createItem,
   updateItem,

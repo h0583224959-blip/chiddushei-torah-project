@@ -16,22 +16,39 @@ function renderItems(items) {
   const role = localStorage.getItem('role');
 
   items.forEach((item) => {
+    const itemId = item._id || item.id;
     const card = document.createElement('div');
     card.className = 'item-card';
+    card.tabIndex = 0;
+    card.setAttribute('role', 'link');
+    card.setAttribute('aria-label', `פתיחת הקובץ: ${item.title}`);
 
     card.innerHTML = `
       <h3>${item.title}</h3>
       <p class="author">מאת: ${item.author}</p>
       ${item.description ? `<p class="desc">${item.description}</p>` : ''}
-      <button type="button" class="btn download-btn" onclick="triggerDownload('${item._id || item.id}', '${item.title}')">
-        הורדת קובץ
-      </button>
-      ${
-        role === 'admin'
-          ? `<button class="btn delete-btn" onclick="handleDeleteItem('${item._id || item.id}')">מחיקה</button>`
-          : ''
-      }
+      <div class="item-actions">
+        <button type="button" class="btn download-btn" data-action="download">הורדת קובץ</button>
+        ${role === 'admin' ? '<button type="button" class="btn delete-btn" data-action="delete">מחיקה</button>' : ''}
+      </div>
     `;
+
+    card.addEventListener('click', (event) => {
+      if (!event.target.closest('button')) openItemFile(itemId);
+    });
+    card.addEventListener('keydown', (event) => {
+      if (event.target === card && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        openItemFile(itemId);
+      }
+    });
+    card.querySelector('[data-action="download"]').addEventListener('click', () => {
+      triggerDownload(itemId, item.title);
+    });
+    const deleteButton = card.querySelector('[data-action="delete"]');
+    if (deleteButton) {
+      deleteButton.addEventListener('click', () => handleDeleteItem(itemId));
+    }
 
     container.appendChild(card);
   });
@@ -151,6 +168,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 function getFileExtension(fileName) {
   const match = fileName && fileName.match(/\.([a-z0-9]+)$/i);
   return match ? match[1].toLowerCase() : '';
+}
+
+function openItemFile(itemId) {
+  const openUrl = `${window.API_BASE_URL.replace(/\/api$/, '')}/api/items/${encodeURIComponent(itemId)}/open`;
+  window.open(openUrl, '_blank', 'noopener,noreferrer');
 }
 
 async function triggerDownload(itemId, title) {
