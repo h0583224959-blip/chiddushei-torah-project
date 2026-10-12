@@ -1,34 +1,25 @@
 const multer = require('multer');
+const fs = require('fs');
 const path = require('path');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// הגדרת החיבור ל-Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const uploadFolder = path.join(__dirname, '..', 'uploads');
+fs.mkdirSync(uploadFolder, { recursive: true });
 
-// הגדרת האחסון בענן עם תמיכה מפורשת בשמע, תמונות ומסמכים
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: async (req, file) => {
-    return {
-      folder: 'project_files',
-      resource_type: 'auto',
-      access_mode: 'public',
-      public_id: `${Date.now()}-${file.originalname.replace(/\.[^/.]+$/, "")}`, // שם הקובץ ללא סיומת
-      format: path.extname(file.originalname).replace('.', ''), // שמירת הסיומת המקורית
-    };
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadFolder);
+  },
+  filename: (req, file, cb) => {
+    const safeName = `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`;
+    cb(null, safeName);
   },
 });
 
-// סינון סוגי קבצים מותרים
 const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
-const allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'mp3', 'm4a', 'wav', 'ogg', 'aac', 'pdf', 'mp4', 'mov', 'avi'];  const isAllowedExt = allowedExtensions.includes(ext);
-const isAllowedMime = 
+  const allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'mp3', 'm4a', 'wav', 'ogg', 'aac', 'pdf', 'mp4', 'mov', 'avi'];
+  const isAllowedExt = allowedExtensions.includes(ext);
+  const isAllowedMime =
     file.mimetype.startsWith('image/') ||
     file.mimetype.startsWith('audio/') ||
     file.mimetype.startsWith('video/') ||
@@ -36,14 +27,15 @@ const isAllowedMime =
 
   if (isAllowedExt || isAllowedMime) {
     return cb(null, true);
-} else {
-    cb(new Error('שגיאה: ניתן להעלות קובצי תמונה, שמע, וידאו או מסמכים בלבד!'));
   }
+
+  cb(new Error('שגיאה: ניתן להעלות קובצי תמונה, שמע, וידאו או מסמכים בלבד!'));
 };
+
 const upload = multer({
-  storage: storage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // עד 20MB
-  fileFilter: fileFilter,
+  storage,
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter,
 });
 
 module.exports = upload;

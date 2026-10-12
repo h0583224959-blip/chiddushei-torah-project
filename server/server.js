@@ -2,8 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 // טעינת משתני הסביבה מתוך תיקיית server
 require('dotenv').config({ path: path.join(__dirname, '.env') });
@@ -58,14 +56,3 @@ function fetchItemFile(item) {
     .then(response => response.blob())
     .catch(error => console.error('שגיאה בטעינת הקובץ:', error));
 }
-
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: async (req, file) => {
-    return {
-      folder: 'project_files',
-      resource_type: 'auto',
-      access_mode: 'public',
-    };
-  },
-});
