@@ -1,27 +1,6 @@
 const Item = require('../models/itemModel');
 const fs = require('fs');
 const path = require('path');
-const multer = require('multer');
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '..', 'uploads'));
-  },
-  filename: function (req, file, cb) {
-    const safeName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
-    cb(null, safeName);
-  }
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 20 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'video/mp4', 'audio/mpeg', 'application/pdf'];
-    if (allowed.includes(file.mimetype)) cb(null, true);
-    else cb(new Error('סוג קובץ לא חוקי'));
-  }
-});
 
 // @desc    קבלת כל הפריטים מהמסד
 // @route   GET /api/items
@@ -64,41 +43,21 @@ const downloadItemFile = async (req, res) => {
       return res.status(404).json({ message: 'לקובץ אין כתובת שמורה' });
     }
 
-    if (/^https?:\/\//i.test(item.fileUrl) && !item.fileUrl.includes('localhost')) {
-      const cloudinaryUrl = new URL(item.fileUrl);
-      const isTransformableCloudinaryAsset =
-        cloudinaryUrl.hostname === 'res.cloudinary.com' &&
-        /\/(image|video)\/upload\//.test(cloudinaryUrl.pathname);
+    const normalizedFileUrl = item.fileUrl || '';
+    const isRemoteHttp = /^https?:\/\//i.test(normalizedFileUrl) && !normalizedFileUrl.includes('localhost');
 
-      const downloadName = item.originalFileName || path.basename(cloudinaryUrl.pathname);
-      const encodedAttachmentName = encodeURIComponent(downloadName).replace(/\./g, '%2E');
-      const downloadUrl = isTransformableCloudinaryAsset
-        ? item.fileUrl.replace('/upload/', `/upload/fl_attachment:${encodedAttachmentName}/`)
-        : item.fileUrl;
-      return res.redirect(downloadUrl);
+    if (isRemoteHttp) {
+      return res.redirect(normalizedFileUrl);
     }
 
-    if (item.fileUrl.startsWith('/uploads/')) {
-      const fileName = path.basename(item.fileUrl);
-      const filePath = path.join(__dirname, '..', 'uploads', fileName);
-
-      if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ message: 'הקובץ המקורי אינו נמצא בתיקיית ההעלאות.' });
-      }
-
-      return res.download(filePath, item.originalFileName || fileName);
-    }
-
-    const normalizedLocalPath = item.fileUrl.replace(/^file:\/\//i, '');
-    const filePath = path.isAbsolute(normalizedLocalPath)
-      ? normalizedLocalPath
-      : path.join(__dirname, '..', 'uploads', path.basename(normalizedLocalPath));
+    const fileName = path.basename(normalizedFileUrl.startsWith('/uploads/') ? normalizedFileUrl : new URL(normalizedFileUrl, 'http://localhost').pathname);
+    const filePath = path.join(__dirname, '..', 'uploads', fileName);
 
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ message: 'הקובץ המקורי אינו נמצא בתיקיית ההעלאות.' });
     }
 
-    return res.download(filePath, item.originalFileName || path.basename(filePath));
+    return res.download(filePath, item.originalFileName || fileName);
   } catch (error) {
     return res.status(500).json({ message: 'שגיאה בהורדת הקובץ', error: error.message });
   }
@@ -122,10 +81,8 @@ const createItem = async (req, res) => {
       return res.status(400).json({ message: 'נא למלא את כל שדות החובה: כותרת ומחבר' });
     }
 
-    const localFileName = uploadedFile.path ? path.basename(uploadedFile.path) : null;
-    const fileUrl = uploadedFile.path
-      ? (uploadedFile.path.includes('uploads') ? `/uploads/${localFileName}` : uploadedFile.path)
-      : (uploadedFile.secure_url || uploadedFile.url);
+    const localFileName = uploadedFile.filename || path.basename(uploadedFile.path || '');
+    const fileUrl = localFileName ? `/uploads/${localFileName}` : (uploadedFile.secure_url || uploadedFile.url);
     const mimeType = uploadedFile.mimetype || uploadedFile.mimeType || 'application/octet-stream';
 
     const newItem = await Item.create({
@@ -191,5 +148,4 @@ module.exports = {
   createItem,
   updateItem,
   deleteItem,
-  upload,
 };
