@@ -2,27 +2,6 @@ const Item = require('../models/itemModel');
 const fs = require('fs');
 const path = require('path');
 const mime = require('mime-types');
-const multer = require('multer');
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '..', 'uploads'));
-  },
-  filename: function (req, file, cb) {
-    const safeName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
-    cb(null, safeName);
-  }
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 20 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'video/mp4', 'audio/mpeg', 'application/pdf'];
-    if (allowed.includes(file.mimetype)) cb(null, true);
-    else cb(new Error('סוג קובץ לא חוקי'));
-  }
-});
 
 // @desc    קבלת כל הפריטים מהמסד
 // @route   GET /api/items
@@ -66,7 +45,9 @@ const openItemFile = async (req, res) => {
     }
 
     if (/^https?:\/\//i.test(item.fileUrl) && !item.fileUrl.includes('localhost')) {
-      return res.redirect(item.fileUrl);
+      return res.status(410).json({
+        message: 'הקובץ שמור בכתובת חיצונית. יש להשיג את הקובץ המקורי ולהעלות אותו מחדש.',
+      });
     }
 
     const fileName = path.basename(new URL(item.fileUrl, 'http://localhost').pathname);
@@ -98,24 +79,9 @@ const downloadItemFile = async (req, res) => {
     }
 
     if (/^https?:\/\//i.test(item.fileUrl) && !item.fileUrl.includes('localhost')) {
-      const cloudinaryUrl = new URL(item.fileUrl);
-      if (cloudinaryUrl.hostname === 'res.cloudinary.com') {
-        const cloudinaryResponse = await fetch(cloudinaryUrl);
-
-        if (!cloudinaryResponse.ok) {
-          return res.status(502).json({
-            message: 'Cloudinary לא אפשר להוריד את הקובץ',
-            cloudinaryStatus: cloudinaryResponse.status,
-          });
-        }
-
-        const downloadName = item.originalFileName || path.basename(cloudinaryUrl.pathname);
-        res.setHeader('Content-Type', item.fileMimeType || cloudinaryResponse.headers.get('content-type') || mime.lookup(downloadName) || 'application/octet-stream');
-        res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(downloadName)}`);
-        return res.send(Buffer.from(await cloudinaryResponse.arrayBuffer()));
-      }
-
-      return res.redirect(item.fileUrl);
+      return res.status(410).json({
+        message: 'הקובץ שמור בכתובת חיצונית. יש להשיג את הקובץ המקורי ולהעלות אותו מחדש.',
+      });
     }
 
     if (item.fileUrl.startsWith('/uploads/')) {
@@ -158,14 +124,16 @@ const createItem = async (req, res) => {
       return res.status(400).json({ message: 'נא להעלות קובץ' });
     }
 
+    if (!uploadedFile.path) {
+      return res.status(400).json({ message: 'הקובץ לא נשמר בתיקיית ההעלאות המקומית' });
+    }
+
     if (!title || !author) {
       return res.status(400).json({ message: 'נא למלא את כל שדות החובה: כותרת ומחבר' });
     }
 
-    const localFileName = uploadedFile.path ? path.basename(uploadedFile.path) : null;
-    const fileUrl = uploadedFile.path
-      ? (uploadedFile.path.includes('uploads') ? `/uploads/${localFileName}` : uploadedFile.path)
-      : (uploadedFile.secure_url || uploadedFile.url);
+    const localFileName = path.basename(uploadedFile.path);
+    const fileUrl = `/uploads/${localFileName}`;
     const mimeType = uploadedFile.mimetype || uploadedFile.mimeType || 'application/octet-stream';
 
     const newItem = await Item.create({
@@ -232,5 +200,4 @@ module.exports = {
   createItem,
   updateItem,
   deleteItem,
-  upload,
 };
