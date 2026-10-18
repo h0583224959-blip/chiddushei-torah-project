@@ -92,8 +92,14 @@ async function handleFormSubmit(event) {
 
   try {
     await createItem(formData);
+    Swal.fire({
+  icon: 'success',
+  title: 'הצלחה!',
+  text: 'הפריט נוסף בהצלחה!',
+  confirmButtonText: 'אישור',
+  confirmButtonColor: '#4a154b' // צבע מותאם לסגנון האתר
+});
 
-    alert('הפריט נוסף בהצלחה!');
     form.reset();
 
     const updatedItems = await getItems();
@@ -114,14 +120,38 @@ function checkAdminState() {
 }
 
 async function handleDeleteItem(id) {
-  if (!confirm('האם את בטוחה שברצונך למחוק פריט זה?')) return;
+  const result = await Swal.fire({
+    title: 'מחיקת פריט',
+    text: 'האם את בטוחה שברצונך למחוק פריט זה?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'כן, למחוק',
+    cancelButtonText: 'ביטול'
+  });
+
+  // אם המשתמשת לחצה על "ביטול", הפעולה נעצרת
+  if (!result.isConfirmed) return;
 
   try {
     await deleteItem(id);
     allItems = allItems.filter((item) => (item._id || item.id) !== id);
     renderItems(allItems);
+
+    Swal.fire({
+      icon: 'success',
+      title: 'נמחק בהצלחה',
+      timer: 1500,
+      showConfirmButton: false
+    });
   } catch (error) {
-    alert('שגיאה במחיקת הפריט: ' + error.message);
+    Swal.fire({
+      icon: 'error',
+      title: 'שגיאה',
+      text: 'שגיאה במחיקת הפריט: ' + error.message,
+      confirmButtonText: 'סגור'
+    });
   }
 }
 
