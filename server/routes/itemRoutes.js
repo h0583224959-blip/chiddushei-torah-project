@@ -12,11 +12,11 @@ const {
 const upload = require('../middlewares/uploadMiddleware');
 const { protect, admin } = require('../middlewares/authMiddleware');
 
-// נתיבים שדורשים התחברות בלבד (כל משתמש רשום יכול לצפות ולהוריד)
-router.get('/', protect, getItems);
-router.get('/:id', protect, getItemById);
-router.get('/:id/open', protect, openItemFile);
-router.get('/:id/download', protect, downloadItemFile);
+// קריאה וצפייה בפריטים זמינות גם למבקרים ללא התחברות
+router.get('/', getItems);
+router.get('/:id', getItemById);
+router.get('/:id/open', openItemFile);
+router.get('/:id/download', downloadItemFile);
 
 // נתיבים שדורשים גם התחברות וגם הרשאת מנהל (רק מנהל יכול להעלות/לערוך/למחוק)
 router.post(
