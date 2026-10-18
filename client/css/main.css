@@ -25,10 +25,35 @@ header, nav, .navbar {
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
 .brand-lockup {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.brand-home-link {
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info span {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .brand-mark {
@@ -515,8 +540,16 @@ form button[type="submit"]:hover {
     padding: 14px 18px !important;
   }
 
+  .user-info {
+    gap: 6px;
+  }
+
   .user-info span {
-    display: none;
+    font-size: 13px;
+  }
+
+  .user-info .logout-btn {
+    padding: 8px 12px !important;
   }
 
   .welcome-section {

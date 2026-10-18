@@ -6,6 +6,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // אם אנחנו בעמוד שאין בו את הטופס הזה, נעצור כאן כדי למנוע שגיאות
   if (!loginForm) return;
 
+  const emailInput = document.getElementById('username');
+  if (emailInput) {
+    emailInput.addEventListener('invalid', () => {
+      if (emailInput.validity.typeMismatch) {
+        emailInput.setCustomValidity('יש להזין כתובת אימייל תקינה הכוללת @');
+      }
+    });
+    emailInput.addEventListener('input', () => emailInput.setCustomValidity(''));
+  }
+
   // האזנה לאירוע שליחת הטופס (לחיצה על Enter או על כפתור ההתחברות)
   loginForm.addEventListener('submit', async (e) => {
     // מניעת ברירת המחדל של הדפדפן (שלא ירענן את הדף)

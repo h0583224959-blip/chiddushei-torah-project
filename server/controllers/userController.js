@@ -31,7 +31,7 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: 'משתמש עם כתובת אימייל זו כבר קיים במערכת' });
     }
 
-    // 4. יצירת מפתח הצפנה (Salt) והצפנת הסיסמה
+    // 4. יצירת מפתח הצפנה  והצפנת הסיסמה
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
