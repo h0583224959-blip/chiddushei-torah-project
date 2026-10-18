@@ -12,26 +12,22 @@ const {
 const upload = require('../middlewares/uploadMiddleware');
 const { protect, admin } = require('../middlewares/authMiddleware');
 
-// נתיב לקבלת כל הפריטים
-router.get('/', getItems);
+// נתיבים שדורשים התחברות בלבד (כל משתמש רשום יכול לצפות ולהוריד)
+router.get('/', protect, getItems);
+router.get('/:id', protect, getItemById);
+router.get('/:id/open', protect, openItemFile);
+router.get('/:id/download', protect, downloadItemFile);
 
-router.get('/:id/open', openItemFile);
+// נתיבים שדורשים גם התחברות וגם הרשאת מנהל (רק מנהל יכול להעלות/לערוך/למחוק)
+router.post(
+  '/',
+  protect,
+  admin,
+  upload.single('file'), // מעלה קובץ יחיד מכל סוג
+  createItem
+);
 
-router.get('/:id/download', downloadItemFile);
-
-// נתיב לקבלת פריט בודד לפי מזהה
-router.get('/:id', getItemById);
-
-// נתיב ליצירת פריט חדש כולל העלאת קובץ
-router.post('/', protect, admin, upload.fields([
-    { name: 'file', maxCount: 1 },
-    { name: 'audio', maxCount: 1 }
-]), createItem);
-
-// נתיב לעדכון פריט
 router.put('/:id', protect, admin, updateItem);
-
-// נתיב למחיקת פריט
 router.delete('/:id', protect, admin, deleteItem);
 
 module.exports = router;

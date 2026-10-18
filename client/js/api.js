@@ -7,24 +7,22 @@ const BASE_URL = 'http://localhost:5000/api';
  */
 async function getItems() {
   try {
-    // שליחת בקשת GET לכתובת http://localhost:5000/api/items
-    const response = await fetch(`${BASE_URL}/items`);
-    
-    // בדיקה האם השרת החזיר תשובה חיובית (קוד 200)
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${BASE_URL}/items`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+
     if (!response.ok) {
       throw new Error('שגיאה בעת טעינת הפריטים מהשרת');
     }
-    
-    // פענוח התשובה מפורמט JSON לאובייקט JavaScript והחזרתו
+
     const items = await response.json();
     return items;
   } catch (error) {
-    // הדפסת השגיאה לקונסול במידה והבקשה נכשלה
     console.error('שגיאה בפונקציה getItems:', error);
     throw error;
   }
 }
-
 /**
  * פונקציה להעלאת פריט חדש יחד עם קובץ
  * מקבלת: formData - אובייקט שמכיל את השדות (כותרת, מחבר) ואת הקובץ

@@ -171,21 +171,33 @@ function getFileExtension(fileName) {
 }
 
 function openItemFile(itemId) {
-  const openUrl = `${window.API_BASE_URL.replace(/\/api$/, '')}/api/items/${encodeURIComponent(itemId)}/open`;
-  window.open(openUrl, '_blank', 'noopener,noreferrer');
+  const item = allItems.find((i) => (i._id || i.id) === itemId);
+  if (item && item.fileUrl) {
+    window.open(item.fileUrl, '_blank', 'noopener,noreferrer');
+  }
 }
 
 async function triggerDownload(itemId, title) {
   try {
     const item = allItems.find((i) => (i._id || i.id) === itemId);
-    const fileUrl = item ? (item.fileUrl || item.file) : null;
-    const downloadUrl = `${window.API_BASE_URL.replace(/\/api$/, '')}/api/items/${encodeURIComponent(itemId)}/download`;
+    if (!item || !item.fileUrl) {
+      alert('הקובץ לא נמצא');
+      return;
+    }
+
+    // הוספת fl_attachment כדי שהדפדפן יוריד את הקובץ ישירות
+    const downloadUrl = item.fileUrl.includes('/upload/')
+      ? item.fileUrl.replace('/upload/', '/upload/fl_attachment/')
+      : item.fileUrl;
+
+    const ext = getFileExtension(item.fileUrl);
+    const fileName = (title || 'קובץ') + (ext ? `.${ext}` : '');
 
     const a = document.createElement('a');
     a.href = downloadUrl;
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
-    a.download = (title || 'קובץ') + (getFileExtension(fileUrl || '') ? '.' + getFileExtension(fileUrl || '') : '');
+    a.download = fileName;
 
     document.body.appendChild(a);
     a.click();

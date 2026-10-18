@@ -1,20 +1,25 @@
 const multer = require('multer');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const path = require('path');
 
-const uploadFolder = path.join(__dirname, '..', 'uploads');
-fs.mkdirSync(uploadFolder, { recursive: true });
+// הגדרת החיבור ל-Cloudinary מתוך משתני הסביבה (.env)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadFolder);
-  },
-  filename: (req, file, cb) => {
-    const safeName = `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`;
-    cb(null, safeName);
+// הגדרת האחסון ב-Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'shared_files', // שם התיקייה ב-Cloudinary
+    resource_type: 'auto',  // מאפשר העלאת תמונות, שמע, וידאו ומסמכים
   },
 });
 
+// סינון סוגי הקבצים (בדיוק כפי שהגדרת)
 const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
   const allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'mp3', 'm4a', 'wav', 'ogg', 'aac', 'pdf', 'mp4', 'mov', 'avi'];
@@ -34,7 +39,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage,
-  limits: { fileSize: 20 * 1024 * 1024 },
+  limits: { fileSize: 20 * 1024 * 1024 }, // מגבלה של 20MB
   fileFilter,
 });
 

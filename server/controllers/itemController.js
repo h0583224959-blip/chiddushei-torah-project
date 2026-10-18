@@ -1,11 +1,6 @@
 const Item = require('../models/itemModel');
-const fs = require('fs');
-const path = require('path');
-const mime = require('mime-types');
 
-// @desc    קבלת כל הפריטים מהמסד
-// @route   GET /api/items
-// @access  Public
+// קבלת כל הפריטים מהמסד
 const getItems = async (req, res) => {
   try {
     const items = await Item.find().sort({ createdAt: -1 });
@@ -15,9 +10,7 @@ const getItems = async (req, res) => {
   }
 };
 
-// @desc    קבלת פריט בודד לפי מזהה
-// @route   GET /api/items/:id
-// @access  Public
+// קבלת פריט בודד לפי מזהה
 const getItemById = async (req, res) => {
   try {
     const item = await Item.findById(req.params.id);
@@ -32,84 +25,44 @@ const getItemById = async (req, res) => {
   }
 };
 
+// פתיחת הקובץ לצפייה ישירה בדפדפן
 const openItemFile = async (req, res) => {
   try {
     const item = await Item.findById(req.params.id);
 
-    if (!item) {
-      return res.status(404).json({ message: 'הפריט לא נמצא' });
+    if (!item || !item.fileUrl) {
+      return res.status(404).json({ message: 'הקובץ לא נמצא או שאין כתובת שמורה' });
     }
 
-    if (!item.fileUrl) {
-      return res.status(404).json({ message: 'לקובץ אין כתובת שמורה' });
-    }
-
-    if (/^https?:\/\//i.test(item.fileUrl) && !item.fileUrl.includes('localhost')) {
-      return res.status(410).json({
-        message: 'הקובץ שמור בכתובת חיצונית. יש להשיג את הקובץ המקורי ולהעלות אותו מחדש.',
-      });
-    }
-
-    const normalizedFileUrl = item.fileUrl || '';
-    const fileName = path.basename(
-      normalizedFileUrl.startsWith('/uploads/')
-        ? normalizedFileUrl
-        : new URL(normalizedFileUrl, 'http://localhost').pathname
-    );
-    const filePath = path.join(__dirname, '..', 'uploads', fileName);
-
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: 'הקובץ המקורי אינו נמצא בתיקיית ההעלאות.' });
-    }
-
-    const originalFileName = item.originalFileName || fileName;
-    res.setHeader('Content-Type', item.fileMimeType || mime.lookup(filePath) || 'application/octet-stream');
-    res.setHeader('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(originalFileName)}`);
-    return res.sendFile(filePath);
+    // הפניה לכתובת הקובץ ב-Cloudinary
+    return res.redirect(item.fileUrl);
   } catch (error) {
     return res.status(500).json({ message: 'שגיאה בפתיחת הקובץ', error: error.message });
   }
 };
 
+// הורדת הקובץ ישירות למחשב
 const downloadItemFile = async (req, res) => {
   try {
     const item = await Item.findById(req.params.id);
 
-    if (!item) {
-      return res.status(404).json({ message: 'הפריט לא נמצא' });
+    if (!item || !item.fileUrl) {
+      return res.status(404).json({ message: 'הקובץ לא נמצא או שאין כתובת שמורה' });
     }
 
-    if (!item.fileUrl) {
-      return res.status(404).json({ message: 'לקובץ אין כתובת שמורה' });
+    // הוספת הדגל fl_attachment לכתובת Cloudinary כדי לכפות הורדה
+    let downloadUrl = item.fileUrl;
+    if (downloadUrl.includes('/upload/')) {
+      downloadUrl = downloadUrl.replace('/upload/', '/upload/fl_attachment/');
     }
 
-    if (/^https?:\/\//i.test(item.fileUrl) && !item.fileUrl.includes('localhost')) {
-      return res.status(410).json({
-        message: 'הקובץ שמור בכתובת חיצונית. יש להשיג את הקובץ המקורי ולהעלות אותו מחדש.',
-      });
-    }
-
-    const normalizedFileUrl = item.fileUrl || '';
-    const fileName = path.basename(
-      normalizedFileUrl.startsWith('/uploads/')
-        ? normalizedFileUrl
-        : new URL(normalizedFileUrl, 'http://localhost').pathname
-    );
-    const filePath = path.join(__dirname, '..', 'uploads', fileName);
-
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: 'הקובץ המקורי אינו נמצא בתיקיית ההעלאות.' });
-    }
-
-    return res.download(filePath, item.originalFileName || fileName);
+    return res.redirect(downloadUrl);
   } catch (error) {
     return res.status(500).json({ message: 'שגיאה בהורדת הקובץ', error: error.message });
   }
 };
 
-// @desc    יצירת פריט חדש
-// @route   POST /api/items
-// @access  Public
+// יצירת פריט חדש ושמירת נתוני הקובץ מ-Cloudinary
 const createItem = async (req, res) => {
   try {
     const { title, author, description } = req.body;
@@ -119,39 +72,32 @@ const createItem = async (req, res) => {
       return res.status(400).json({ message: 'נא להעלות קובץ' });
     }
 
-    if (!uploadedFile.path) {
-      return res.status(400).json({ message: 'הקובץ לא נשמר בתיקיית ההעלאות המקומית' });
-    }
-
     if (!title || !author) {
       return res.status(400).json({ message: 'נא למלא את כל שדות החובה: כותרת ומחבר' });
     }
 
-    const localFileName = uploadedFile.filename || path.basename(uploadedFile.path || '');
-    const fileUrl = localFileName ? `/uploads/${localFileName}` : (uploadedFile.secure_url || uploadedFile.url);
-    const mimeType = uploadedFile.mimetype || uploadedFile.mimeType || 'application/octet-stream';
+    // הכתובת הישירה מקלאודינרי מתקבלת בשדה path או secure_url
+    const fileUrl = uploadedFile.path || uploadedFile.secure_url;
+    const mimeType = uploadedFile.mimetype || 'application/octet-stream';
 
     const newItem = await Item.create({
       title,
       author,
       description,
       fileUrl,
-      originalFileName: uploadedFile.originalname || uploadedFile.original_name,
+      originalFileName: uploadedFile.originalname,
       fileMimeType: mimeType,
-      fileFormat: mimeType,
+      fileFormat: uploadedFile.format || mimeType,
       createdBy: req.user ? req.user._id : null,
     });
 
     return res.status(201).json(newItem);
   } catch (error) {
-    console.error('שגיאה ביצירת הפריט:', error);
     return res.status(500).json({ message: 'שגיאה ביצירת הפריט', error: error.message });
   }
 };
 
-// @desc    עדכון פריט
-// @route   PUT /api/items/:id
-// @access  Public
+// עדכון פריט
 const updateItem = async (req, res) => {
   try {
     const updatedItem = await Item.findByIdAndUpdate(
@@ -170,9 +116,7 @@ const updateItem = async (req, res) => {
   }
 };
 
-// @desc    מחיקת פריט
-// @route   DELETE /api/items/:id
-// @access  Public
+// מחיקת פריט
 const deleteItem = async (req, res) => {
   try {
     const deletedItem = await Item.findByIdAndDelete(req.params.id);
