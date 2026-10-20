@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
     getItems,
     getItemById,
     openItemFile,
@@ -8,15 +8,16 @@ const {
     createItem,
     updateItem,
     deleteItem
-} = require('../controllers/itemController');
-const upload = require('../middlewares/uploadMiddleware');
-const { protect, admin } = require('../middlewares/authMiddleware');
+} from '../controllers/itemController.js';
+import upload from '../middlewares/uploadMiddleware.js';
+import { protect, admin } from '../middlewares/authMiddleware.js';
+import { validate, validateItemCreate, itemUpdateSchema, itemIdSchema } from '../middlewares/validationMiddleware.js';
 
 // קריאה וצפייה בפריטים זמינות גם למבקרים ללא התחברות
 router.get('/', getItems);
-router.get('/:id', getItemById);
-router.get('/:id/open', openItemFile);
-router.get('/:id/download', downloadItemFile);
+router.get('/:id', validate(itemIdSchema, 'params'), getItemById);
+router.get('/:id/open', validate(itemIdSchema, 'params'), openItemFile);
+router.get('/:id/download', validate(itemIdSchema, 'params'), downloadItemFile);
 
 // נתיבים שדורשים גם התחברות וגם הרשאת מנהל (רק מנהל יכול להעלות/לערוך/למחוק)
 router.post(
@@ -24,10 +25,11 @@ router.post(
   protect,
   admin,
   upload.single('file'), // מעלה קובץ יחיד מכל סוג
+  validateItemCreate,
   createItem
 );
 
-router.put('/:id', protect, admin, updateItem);
-router.delete('/:id', protect, admin, deleteItem);
+router.put('/:id', protect, admin, validate(itemIdSchema, 'params'), validate(itemUpdateSchema), updateItem);
+router.delete('/:id', protect, admin, validate(itemIdSchema, 'params'), deleteItem);
 
-module.exports = router;
+export default router;

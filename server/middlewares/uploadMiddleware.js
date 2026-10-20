@@ -1,7 +1,9 @@
-const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const path = require('path');
+import multer from 'multer';
+import cloudinaryPackage from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import path from 'node:path';
+
+const cloudinary = cloudinaryPackage.v2;
 
 // הגדרת החיבור ל-Cloudinary מתוך משתני הסביבה (.env)
 cloudinary.config({
@@ -43,4 +45,4 @@ const upload = multer({
   fileFilter,
 });
 
-module.exports = upload;
+export default upload;

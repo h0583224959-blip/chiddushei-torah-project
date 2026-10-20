@@ -8,7 +8,7 @@ function renderItems(items) {
 
   container.innerHTML = '';
 
-  if (!items || items.length === 0) {
+  if (!items || items.length === 0) {ח
     container.innerHTML = '<p class="no-items">לא נמצאו פריטים להצגה.</p>';
     return;
   }

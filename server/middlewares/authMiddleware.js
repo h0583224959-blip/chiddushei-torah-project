@@ -1,38 +1,27 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
+import jwt from 'jsonwebtoken';
+import User from '../models/userModel.js';
+import { createHttpError } from './httpError.js';
 
 // 1. פונקציית אימות: בדיקה אם נשלח טוקן תקין וחילוץ פרטי המשתמש
 const protect = async (req, res, next) => {
-  let token;
-
-  // בדיקה אם נשלחה כותרת אימות תקנית המתחילה ב-Bearer
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
-    try {
-      // חילוץ מחרוזת הטוקן
-      token = req.headers.authorization.split(' ')[1];
-
-      // פענוח הטוקן באמצעות המפתח הסודי
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretKey123');
-
-      // שליפת פרטי המשתמש ממסד הנתונים ללא שדה הסיסמה
-      req.user = await User.findById(decoded.id).select('-password');
-
-      if (!req.user) {
-        return res.status(401).json({ message: 'משתמש לא קיים במערכת' });
-      }
-
-      next(); // אישור מעבר לשלב הבא
-    } catch (error) {
-      return res.status(401).json({ message: 'אימות נכשל, טוקן אינו תקין' });
-    }
+  const authorization = req.headers.authorization;
+  if (!authorization?.startsWith('Bearer ')) {
+    throw createHttpError('גישה נדחתה, לא סופק טוקן', 401);
   }
 
-  if (!token) {
-    return res.status(401).json({ message: 'גישה נדחתה, לא סופק טוקן' });
+  let decoded;
+  try {
+    decoded = jwt.verify(authorization.split(' ')[1], process.env.JWT_SECRET);
+  } catch {
+    throw createHttpError('אימות נכשל, טוקן אינו תקין', 401);
   }
+
+  req.user = await User.findById(decoded.id).select('-password');
+  if (!req.user) {
+    throw createHttpError('משתמש לא קיים במערכת', 401);
+  }
+
+  next();
 };
 
 // 2. פונקציית בדיקת תפקיד: מוודאת שהמשתמש הוא מנהל (role === 'admin')
@@ -48,11 +37,8 @@ const admin = (req, res, next) => {
   ) {
     next(); // המשתמש מורשה כמנהל, ממשיכים
   } else {
-    res.status(403).json({ message: 'גישה חסומה: מיועד למנהל מערכת בלבד' });
+    throw createHttpError('גישה חסומה: מיועד למנהל מערכת בלבד', 403);
   }
 };
 
-module.exports = {
-  protect,
-  admin,
-};
+export { protect, admin };

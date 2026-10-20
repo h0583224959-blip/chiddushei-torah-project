@@ -49,6 +49,7 @@
     "inherits": "^2.0.4",
     "ipaddr.js": "^1.9.1",
     "is-promise": "^4.0.0",
+    "joi": "^18.3.0",
     "jsonwebtoken": "^9.0.3",
     "jwa": "^2.0.1",
     "jws": "^4.0.1",
@@ -126,7 +127,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/h0583224959-blip/chiddushei-torah-project/issues"
   },

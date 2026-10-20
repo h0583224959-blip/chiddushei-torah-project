@@ -1,11 +1,12 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const userController = require('../controllers/userController');
+import * as userController from '../controllers/userController.js';
+import { validate, registerSchema, loginSchema } from '../middlewares/validationMiddleware.js';
 
 // נתיב רישום משתמש חדש
-router.post('/register', userController.register);
+router.post('/register', validate(registerSchema), userController.register);
 
 // נתיב התחברות משתמש קיים
-router.post('/login', userController.login);
+router.post('/login', validate(loginSchema), userController.login);
 
-module.exports = router;
+export default router;
