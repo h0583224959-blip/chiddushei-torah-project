@@ -30,6 +30,10 @@ form, .login-card, .login-container {
   gap: 16px !important;
 }
 
+form[hidden] {
+  display: none !important;
+}
+
 h1, h2 {
   text-align: center !important;
   color: #0f1c2e !important;
@@ -94,4 +98,17 @@ a {
 
 a:hover {
   color: #c5a059 !important;
+}
+
+.auth-switch {
+  background: none;
+  border: 0;
+  color: #64748b;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
+
+.auth-switch:hover {
+  color: #c5a059;
 }

@@ -24,9 +24,31 @@
       </div>
 
       <button type="submit" class="auth-btn">התחברות</button>
+      <button type="button" class="auth-switch" id="showRegister">אין לך חשבון? יצירת חשבון משתמש</button>
+    </form>
+
+    <form id="registerForm" hidden>
+      <div class="form-group">
+        <label for="registerName">שם</label>
+        <input type="text" id="registerName" class="form-input" required autocomplete="name">
+      </div>
+
+      <div class="form-group">
+        <label for="registerEmail">כתובת אימייל</label>
+        <input type="email" id="registerEmail" class="form-input" required autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label for="registerPassword">סיסמה לבחירתך</label>
+        <input type="password" id="registerPassword" class="form-input" required autocomplete="new-password">
+      </div>
+
+      <button type="submit" class="auth-btn">יצירת חשבון</button>
+      <button type="button" class="auth-switch" id="showLogin">כבר יש לך חשבון? מעבר להתחברות</button>
     </form>
   </main>
 
+  <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
 </body>
 </html>

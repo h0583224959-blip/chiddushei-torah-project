@@ -12,6 +12,12 @@ async function getItems() {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
 
+    if (response.status === 401) {
+      logout();
+      window.location.replace('login.html');
+      throw new Error('פג תוקף ההתחברות, יש להתחבר מחדש');
+    }
+
     if (!response.ok) {
       throw new Error('שגיאה בעת טעינת הפריטים מהשרת');
     }
@@ -106,6 +112,7 @@ async function login(email, password) {
     if (data.token) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.user?.role || data.role || 'user');
+      localStorage.setItem('username', data.user?.username || data.user?.email || email);
     }
     
     return data;
@@ -114,6 +121,21 @@ async function login(email, password) {
     throw error;
   }
 }
+
+async function registerUser(username, email, password) {
+  const response = await fetch(`${BASE_URL}/users/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, email, password })
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || 'לא ניתן ליצור חשבון');
+  }
+
+  return data;
+}
 /**
  * בדיקת מצב ההתחברות הנוכחי
  * מחזירה: אובייקט עם טוקן ותפקיד אם מחובר, או null אם לא מחובר
@@ -121,9 +143,10 @@ async function login(email, password) {
 function getCurrentUser() {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
+  const username = localStorage.getItem('username');
   
   if (token) {
-    return { token, role };
+    return { token, role, username };
   }
   return null;
 }
@@ -134,4 +157,5 @@ function getCurrentUser() {
 function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('role');
+  localStorage.removeItem('username');
 }

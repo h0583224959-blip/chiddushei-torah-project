@@ -13,11 +13,11 @@ import upload from '../middlewares/uploadMiddleware.js';
 import { protect, admin } from '../middlewares/authMiddleware.js';
 import { validate, validateItemCreate, itemUpdateSchema, itemIdSchema } from '../middlewares/validationMiddleware.js';
 
-// קריאה וצפייה בפריטים זמינות גם למבקרים ללא התחברות
-router.get('/', getItems);
-router.get('/:id', validate(itemIdSchema, 'params'), getItemById);
-router.get('/:id/open', validate(itemIdSchema, 'params'), openItemFile);
-router.get('/:id/download', validate(itemIdSchema, 'params'), downloadItemFile);
+// קריאה וצפייה בפריטים דורשות התחברות
+router.get('/', protect, getItems);
+router.get('/:id', protect, validate(itemIdSchema, 'params'), getItemById);
+router.get('/:id/open', protect, validate(itemIdSchema, 'params'), openItemFile);
+router.get('/:id/download', protect, validate(itemIdSchema, 'params'), downloadItemFile);
 
 // נתיבים שדורשים גם התחברות וגם הרשאת מנהל (רק מנהל יכול להעלות/לערוך/למחוק)
 router.post(
