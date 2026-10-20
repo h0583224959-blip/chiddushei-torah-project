@@ -113,6 +113,7 @@ async function login(email, password) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.user?.role || data.role || 'user');
       localStorage.setItem('username', data.user?.username || data.user?.email || email);
+      localStorage.setItem('greetingName', data.user?.greetingName || data.user?.username || data.user?.email || email);
     }
     
     return data;
@@ -144,9 +145,10 @@ function getCurrentUser() {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
   const username = localStorage.getItem('username');
+  const greetingName = localStorage.getItem('greetingName');
   
   if (token) {
-    return { token, role, username };
+    return { token, role, username, greetingName };
   }
   return null;
 }
@@ -158,4 +160,5 @@ function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('role');
   localStorage.removeItem('username');
+  localStorage.removeItem('greetingName');
 }

@@ -14,7 +14,9 @@ const validate = (schema, property = 'body') => (req, res, next) => {
 const registerSchema = Joi.object({
   username: Joi.string().trim().required(),
   email: Joi.string().trim().lowercase().email().required(),
-  password: Joi.string().required(),
+  password: Joi.string().min(8).required().messages({
+    'string.min': 'הסיסמה חייבת להכיל לפחות 8 תווים'
+  }),
 });
 
 const loginSchema = Joi.object({

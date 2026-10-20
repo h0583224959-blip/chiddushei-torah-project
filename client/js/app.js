@@ -161,10 +161,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
   const username = localStorage.getItem('username');
+  const greetingName = localStorage.getItem('greetingName');
 
   if (token) {
     if (userNameDisplay) {
-      userNameDisplay.textContent = `שלום, ${username || (role === 'admin' ? 'מנהל' : 'משתמש')}`;
+      userNameDisplay.textContent = `היי ${greetingName || username || (role === 'admin' ? 'מנהל' : 'משתמש')}`;
     }
 
     if (authBtn) {

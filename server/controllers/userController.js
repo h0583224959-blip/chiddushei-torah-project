@@ -5,6 +5,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { createHttpError } from '../middlewares/httpError.js';
 
 const configuredAdmins = () => [1, 2].map((number) => ({
+  number,
   email: (process.env[`ADMIN_EMAIL_${number}`] || '').trim().toLowerCase(),
   password: process.env[`ADMIN_PASSWORD_${number}`] || ''
 })).filter((admin) => admin.email);
@@ -83,6 +84,7 @@ export const login = async (req, res) => {
     user: {
       id: user._id,
       username: user.username,
+      greetingName: adminAccount ? `מנהל ${adminAccount.number}` : user.username,
       email: user.email,
       role: user.role
     }

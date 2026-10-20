@@ -6,6 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const registerForm = document.getElementById('registerForm');
   const showRegister = document.getElementById('showRegister');
   const showLogin = document.getElementById('showLogin');
+  const registerPassword = document.getElementById('registerPassword');
+
+  registerPassword.addEventListener('invalid', () => {
+    if (registerPassword.validity.tooShort) {
+      registerPassword.setCustomValidity('הסיסמה חייבת להכיל לפחות 8 תווים');
+    }
+  });
+  registerPassword.addEventListener('input', () => registerPassword.setCustomValidity(''));
 
   showRegister.addEventListener('click', () => {
     loginForm.hidden = true;
