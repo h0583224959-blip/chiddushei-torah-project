@@ -1,5 +1,7 @@
 import Joi from 'joi';
-
+//
+// פונקציה זו משמשת לאימות נתונים שמגיעים מהבקשה (request) לפי סכימה מוגדרת מראש. 
+// היא מקבלת סכימה (schema) ואופציונלית את סוג הנתונים לבדיקה (property), ומחזירה פונקציה שמבצעת את האימות. אם הנתונים אינם תואמים לסכימה, היא מעבירה את השגיאה למידלוואר הבא (next). אם הנתונים תקינים, היא מעדכנת את הבקשה עם הערכים המסוננים וממשיכה למידלוואר הבא. 
 const validate = (schema, property = 'body') => (req, res, next) => {
   const { error, value } = schema.validate(req[property], {
     abortEarly: false,

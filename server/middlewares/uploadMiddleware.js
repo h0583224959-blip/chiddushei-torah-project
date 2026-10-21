@@ -1,3 +1,4 @@
+//כcloudinary מתבצעות בקובץ זה, כולל הגדרת החיבור ל-Cloudinary, הגדרת האחסון והגבלת סוגי הקבצים המותרים להעלאה.
 import multer from 'multer';
 import cloudinaryPackage from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
@@ -32,14 +33,14 @@ const fileFilter = (req, file, cb) => {
     file.mimetype.startsWith('video/') ||
     file.mimetype === 'application/pdf';
 
-  if (isAllowedExt || isAllowedMime) {
+  if (isAllowedExt || isAllowedMime) { // אם הסיומת או סוג ה-MIME של הקובץ תואמים לאחד מסוגי הקבצים המותרים, מאפשרים את ההעלאה  
     return cb(null, true);
   }
 
   cb(new Error('שגיאה: ניתן להעלות קובצי תמונה, שמע, וידאו או מסמכים בלבד!'));
 };
 
-const upload = multer({
+const upload = multer({ // הגדרת המידלוואר של Multer  
   storage,
   limits: { fileSize: 20 * 1024 * 1024 }, // מגבלה של 20MB
   fileFilter,
