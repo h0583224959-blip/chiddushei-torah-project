@@ -1,4 +1,5 @@
 let allItems = [];
+let editingItemId = null;
 
 window.API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000/api';
 
@@ -8,7 +9,7 @@ function renderItems(items) {
 
   container.innerHTML = '';
 
-  if (!items || items.length === 0) {ח
+  if (!items || items.length === 0) {
     container.innerHTML = '<p class="no-items">לא נמצאו פריטים להצגה.</p>';
     return;
   }
@@ -29,6 +30,7 @@ function renderItems(items) {
       ${item.description ? `<p class="desc">${item.description}</p>` : ''}
       <div class="item-actions">
         <button type="button" class="btn download-btn" data-action="download">הורדת קובץ</button>
+        ${role === 'admin' ? '<button type="button" class="btn edit-btn" data-action="edit">עריכה</button>' : ''}
         ${role === 'admin' ? '<button type="button" class="btn delete-btn" data-action="delete">מחיקה</button>' : ''}
       </div>
     `;
@@ -45,6 +47,10 @@ function renderItems(items) {
     card.querySelector('[data-action="download"]').addEventListener('click', () => {
       triggerDownload(itemId, item.title);
     });
+    const editButton = card.querySelector('[data-action="edit"]');
+    if (editButton) {
+      editButton.addEventListener('click', () => startEditItem(itemId));
+    }
     const deleteButton = card.querySelector('[data-action="delete"]');
     if (deleteButton) {
       deleteButton.addEventListener('click', () => handleDeleteItem(itemId));
@@ -91,23 +97,65 @@ async function handleFormSubmit(event) {
   const formData = new FormData(form);
 
   try {
-    await createItem(formData);
-    Swal.fire({
-  icon: 'success',
-  title: 'הצלחה!',
-  text: 'הפריט נוסף בהצלחה!',
-  confirmButtonText: 'אישור',
-  confirmButtonColor: '#4a154b' // צבע מותאם לסגנון האתר
-});
-
-    form.reset();
+    if (editingItemId) {
+      await updateItem(editingItemId, {
+        title: formData.get('title'),
+        author: formData.get('author'),
+        description: formData.get('description')
+      });
+      cancelEdit();
+      Swal.fire({
+        icon: 'success',
+        title: 'הפריט עודכן בהצלחה',
+        confirmButtonText: 'אישור',
+        confirmButtonColor: '#4a154b'
+      });
+    } else {
+      await createItem(formData);
+      form.reset();
+      Swal.fire({
+        icon: 'success',
+        title: 'הצלחה!',
+        text: 'הפריט נוסף בהצלחה!',
+        confirmButtonText: 'אישור',
+        confirmButtonColor: '#4a154b'
+      });
+    }
 
     const updatedItems = await getItems();
     allItems = updatedItems;
     renderItems(updatedItems);
   } catch (error) {
-    alert('שגיאה בהוספת הפריט: ' + error.message);
+    alert(`${editingItemId ? 'שגיאה בעדכון הפריט' : 'שגיאה בהוספת הפריט'}: ${error.message}`);
   }
+}
+
+function startEditItem(id) {
+  const item = allItems.find((currentItem) => (currentItem._id || currentItem.id) === id);
+  if (!item) return;
+
+  editingItemId = id;
+  document.getElementById('title').value = item.title || '';
+  document.getElementById('author').value = item.author || '';
+  document.getElementById('description').value = item.description || '';
+  document.getElementById('file').required = false;
+  document.getElementById('file-form-group').hidden = true;
+  document.getElementById('upload-heading').textContent = 'עריכת חידוש';
+  document.querySelector('#upload-form .submit-btn').textContent = 'שמירת שינויים';
+  document.getElementById('cancel-edit-btn').hidden = false;
+  document.getElementById('upload-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('title').focus();
+}
+
+function cancelEdit() {
+  editingItemId = null;
+  const form = document.getElementById('upload-form');
+  form.reset();
+  document.getElementById('file').required = true;
+  document.getElementById('file-form-group').hidden = false;
+  document.getElementById('upload-heading').textContent = 'הוספת חידוש חדש';
+  form.querySelector('.submit-btn').textContent = 'העלאת פריט';
+  document.getElementById('cancel-edit-btn').hidden = true;
 }
 
 function checkAdminState() {
@@ -184,6 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const uploadForm = document.getElementById('upload-form');
   if (uploadForm) {
     uploadForm.addEventListener('submit', handleFormSubmit);
+    document.getElementById('cancel-edit-btn').addEventListener('click', cancelEdit);
   }
 
   try {
