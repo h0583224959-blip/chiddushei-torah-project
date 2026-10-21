@@ -15,6 +15,6 @@ const itemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Item = mongoose.model('Item', itemSchema);
+const Item = mongoose.model('Item', itemSchema); // מודל זה מייצג את אוסף הפריטים במסד הנתונים, כאשר כל פריט מכיל מידע על הכותרת, המחבר, תיאור, כתובת הקובץ, שם הקובץ המקורי, סוג MIME של הקובץ, פורמט הקובץ, תמונת שער (אם קיימת), ומזהה המשתמש שיצר את הפריט.
 
 export default Item;

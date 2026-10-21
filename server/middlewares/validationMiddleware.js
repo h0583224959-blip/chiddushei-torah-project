@@ -1,10 +1,17 @@
 import Joi from 'joi';
 
+<<<<<<< HEAD
 const validate = (schema, property = 'body') => (req, res, next) => {
   // פונקציה שמבצעת את האימות של הנתונים לפי הסכמה (schema) שניתנה
   const { error, value } = schema.validate(req[property], {// בדיקה אם הנתונים תואמים לסכמה 
     abortEarly: false,// לא להפסיק את האימות אחרי השגיאה הראשונה, אלא לאסוף את כל השגיאות
     stripUnknown: true,// להסיר שדות לא מוכרים מהנתונים לפני החזרת הערך המאומת
+=======
+const validate = (schema, property = 'body') => (req, res, next) => { // פונקציה זו מחזירה middleware שמבצע ולידציה על הנתונים בבקשה (request) לפי הסכמה (schema) שניתנה  
+  const { error, value } = schema.validate(req[property], {
+    abortEarly: false,
+    stripUnknown: true,
+>>>>>>> d0609fb (Save my changes)
   });
 
   if (error) return next(error);// אם יש שגיאות, מעבירים את השגיאה למתאם השגיאות המרכזי
