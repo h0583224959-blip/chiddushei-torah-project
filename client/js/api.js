@@ -62,6 +62,25 @@ async function createItem(formData) {
   }
 }
 
+async function updateItem(id, itemData) {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${BASE_URL}/items/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(itemData)
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || `שגיאה בעדכון הפריט (HTTP ${response.status})`);
+  }
+
+  return data;
+}
+
 /**
  * פונקציה למחיקת פריט קיים
  * מקבלת: id - המזהה הייחודי של הפריט למחיקה

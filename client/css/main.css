@@ -525,6 +525,20 @@ form button[type="submit"]:hover {
   height: 36px !important;
 }
 
+.edit-btn, #items-container > div .edit-btn {
+  background-color: #f3e4a9 !important;
+  color: #451660 !important;
+}
+
+.cancel-edit-btn {
+  justify-self: start;
+  background: #64748b !important;
+}
+
+[hidden] {
+  display: none !important;
+}
+
 .no-items {
   grid-column: 1 / -1;
   padding: 44px 20px;
@@ -576,6 +590,7 @@ form button[type="submit"]:hover {
 }
 
 .item-actions .download-btn,
+.item-actions .edit-btn,
 .item-actions .delete-btn {
   flex: 1;
 }
