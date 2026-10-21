@@ -1,9 +1,9 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import dotenv from 'dotenv';
+import express from 'express'; // ייבוא ספריית Express  
+import mongoose from 'mongoose'; // ייבוא ספריית Mongoose לניהול מסד הנתונים MongoDB  
+import cors from 'cors'; // ייבוא ספריית CORS לניהול מדיניות שיתוף משאבים בין מקורות שונים  
+import path from 'node:path';// ייבוא ספריית Path לניהול נתיבי קבצים
+import { fileURLToPath } from 'node:url';// ייבוא פונקציה fileURLToPath להמרת URL של קובץ לנתיב קובץ
+import dotenv from 'dotenv'; // ייבוא ספריית Dotenv לניהול משתני סביבה  
 
 // טעינת משתני הסביבה מתוך תיקיית server
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

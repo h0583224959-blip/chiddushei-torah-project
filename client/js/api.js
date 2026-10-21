@@ -1,5 +1,5 @@
 // כתובת הבסיס של השרת - כל הפניות לרשת יתחילו מכאן
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = 'http://localhost:5000/api';// כתובת הבסיס של השרת - כל הפניות לרשת יתחילו מכאן
 
 /**
  * פונקציה לשליפת כל הפריטים הקיימים במסד הנתונים
@@ -7,26 +7,29 @@ const BASE_URL = 'http://localhost:5000/api';
  */
 async function getItems() {
   try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${BASE_URL}/items`, {
+    const token = localStorage.getItem('token');// שליפת הטוקן מהזיכרון המקומי של הדפדפן
+    const response = await fetch(`${BASE_URL}/items`, {// שליחת בקשת GET לשרת עם הטוקן בכותרת Authorization
       headers: token ? { Authorization: `Bearer ${token}` } : {}
+      // אם אין טוקן, לא נשלח כותרת Authorization
     });
 
     if (response.status === 401) {
-      logout();
-      window.location.replace('login.html');
-      throw new Error('פג תוקף ההתחברות, יש להתחבר מחדש');
+      // אם השרת מחזיר קוד 401 (Unauthorized), סימן שהטוקן אינו תקין או פג תוקף
+      logout();// קריאה לפונקציה שמוחקת את כל פרטי ההתחברות מהזיכרון המקומי של הדפדפן
+      window.location.replace('login.html');// הפניה מחדש לדף ההתחברות
+      throw new Error('פג תוקף ההתחברות, יש להתחבר מחדש');//
     }
 
-    if (!response.ok) {
+    if (!response.ok) {// אם השרת מחזיר קוד שגיאה אחר, נזרוק שגיאה עם הודעה מתאימה
       throw new Error('שגיאה בעת טעינת הפריטים מהשרת');
     }
 
     const items = await response.json();
+    // החזרת המערך של הפריטים שהתקבל מהשרת
     return items;
-  } catch (error) {
-    console.error('שגיאה בפונקציה getItems:', error);
-    throw error;
+  } catch (error) {// טיפול בשגיאות ברשת או בעיבוד הנתונים
+    console.error('שגיאה בפונקציה getItems:', error);// הדפסת השגיאה בקונסול לצורך ניפוי באגים
+    throw error;// זריקת השגיאה למעלה כדי שהקריאה לפונקציה תדע על השגיאה ותוכל לטפל בה
   }
 }
 /**
@@ -64,17 +67,16 @@ async function createItem(formData) {
  * מקבלת: id - המזהה הייחודי של הפריט למחיקה
  * מחזירה: אישור על המחיקה מהשרת
  */
-async function deleteItem(id) {
+async function deleteItem(id) {// פונקציה זו שולחת בקשת מחיקה לשרת עבור פריט מסוים לפי המזהה שלו  
   try {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token');// שליפת הטוקן מהזיכרון המקומי של הדפדפן  
     // שליחת בקשת מחיקה עם ה-id בנתיב
     const response = await fetch(`${BASE_URL}/items/${id}`, {
       method: 'DELETE',
+      // אם יש טוקן, נוסיף אותו לכותרת Authorization
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
-    
-    // בדיקה האם המחיקה עברה בהצלחה
-    if (!response.ok) {
+    if (!response.ok) {// אם השרת מחזיר קוד שגיאה, נזרוק שגיאה עם הודעה מתאימה
       throw new Error('שגיאה בעת מחיקת הפריט');
     }
     
@@ -106,28 +108,30 @@ async function login(email, password) {
       throw new Error('פרטי התחברות שגויים');
     }
     
-    const data = await response.json();
+    const data = await response.json();// המרת התגובה לאובייקט JSON
     
     // שמירת מזהה ההתחברות וההרשאה בזיכרון המקומי של הדפדפן
-    if (data.token) {
-      localStorage.setItem('token', data.token);
+    if (data.token) {// אם התקבל טוקן מהשרת, נשמור אותו יחד עם פרטי המשתמש
+      localStorage.setItem('token', data.token);// שמירת הטוקן בזיכרון המקומי של הדפדפן
       localStorage.setItem('role', data.user?.role || data.role || 'user');
       localStorage.setItem('username', data.user?.username || data.user?.email || email);
       localStorage.setItem('greetingName', data.user?.greetingName || data.user?.username || data.user?.email || email);
     }
     
-    return data;
-  } catch (error) {
-    console.error('שגיאה בפונקציה login:', error);
+    return data;// החזרת הנתונים שהתקבלו מהשרת (כולל הטוקן ופרטי המשתמש)
+  } catch (error) {// טיפול בשגיאות ברשת או בעיבוד הנתונים
+    console.error('שגיאה בפונקציה login:', error);// הדפסת השגיאה בקונסול לצורך ניפוי באגים
     throw error;
   }
 }
 
-async function registerUser(username, email, password) {
+async function registerUser(username, email, password) {//
   const response = await fetch(`${BASE_URL}/users/register`, {
-    method: 'POST',
+    method: 'POST',// שליחת בקשת POST לשרת עם פרטי המשתמש החדש
     headers: { 'Content-Type': 'application/json' },
+    // שליחת פרטי המשתמש בפורמט JSON
     body: JSON.stringify({ username, email, password })
+    // המרת האובייקט JSON למחרוזת לשליחה לשרת
   });
 
   const data = await response.json().catch(() => ({}));
@@ -140,15 +144,15 @@ async function registerUser(username, email, password) {
 /**
  * בדיקת מצב ההתחברות הנוכחי
  * מחזירה: אובייקט עם טוקן ותפקיד אם מחובר, או null אם לא מחובר
- */
-function getCurrentUser() {
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
-  const username = localStorage.getItem('username');
-  const greetingName = localStorage.getItem('greetingName');
+ */// פונקציה זו בודקת אם יש טוקן שמורה בזיכרון המקומי של הדפדפן ומחזירה את פרטי המשתמש
+function getCurrentUser() { 
+  const token = localStorage.getItem('token');// שליפת הטוקן מהזיכרון המקומי של הדפדפן
+  const role = localStorage.getItem('role');// שליפת התפקיד מהזיכרון המקומי של הדפדפן
+  const username = localStorage.getItem('username');// שליפת שם המשתמש מהזיכרון המקומי של הדפדפן
+  const greetingName = localStorage.getItem('greetingName');// שליפת שם הברכה מהזיכרון המקומי של הדפדפן
   
-  if (token) {
-    return { token, role, username, greetingName };
+  if (token) {// אם קיים טוקן, מחזירים אובייקט עם פרטי המשתמש
+    return { token, role, username, greetingName };// אם אין טוקן, מחזירים null
   }
   return null;
 }
@@ -156,9 +160,9 @@ function getCurrentUser() {
 /**
  * התנתקות מהמערכת ומחיקת נתוני ההתחברות מהדפדפן
  */
-function logout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('role');
-  localStorage.removeItem('username');
-  localStorage.removeItem('greetingName');
+function logout() {// פונקציה זו מוחקת את כל פרטי ההתחברות מהזיכרון המקומי של הדפדפן
+  localStorage.removeItem('token');// מחיקת הטוקן
+  localStorage.removeItem('role');// מחיקת תפקיד המשתמש
+  localStorage.removeItem('username');// מחיקת שם המשתמש
+  localStorage.removeItem('greetingName');// מחיקת שם הברכה (למשתמשים מנהלים)
 }

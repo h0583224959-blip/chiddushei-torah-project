@@ -22,11 +22,12 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user'
   },
-  createdAt: {
+  createdAt: { // תאריך יצירת המשתמש
     type: Date,
-    default: Date.now
+    default: Date.now // ברירת מחדל: התאריך הנוכחי
   }
 });
 const User = mongoose.model('User', userSchema);
+// יצוא המודל User לשימוש בקבצים אחרים
 
 export default User;
