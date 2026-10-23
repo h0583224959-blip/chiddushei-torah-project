@@ -1,8 +1,8 @@
 import express from 'express'; // ייבוא ספריית Express  
 import mongoose from 'mongoose'; // ייבוא ספריית Mongoose לניהול מסד הנתונים MongoDB  
 import cors from 'cors'; // ייבוא ספריית CORS לניהול מדיניות שיתוף משאבים בין מקורות שונים  
-import path from 'node:path';// ייבוא ספריית Path לניהול נתיבי קבצים
-import { fileURLToPath } from 'node:url';// ייבוא פונקציה fileURLToPath להמרת URL של קובץ לנתיב קובץ
+import path from 'node:path'; // ייבוא ספריית Path לניהול נתיבי קבצים
+import { fileURLToPath } from 'node:url'; // ייבוא פונקציה fileURLToPath להמרת URL של קובץ לנתיב קובץ
 import dotenv from 'dotenv'; // ייבוא ספריית Dotenv לניהול משתני סביבה  
 
 // טעינת משתני הסביבה מתוך תיקיית server
@@ -24,10 +24,18 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
   }
 }));
 
-// ניתובי כתובות
+// ניתובי כתובות ה-API
 app.use('/api/users', userRoutes);
 app.use('/api/items', itemRoutes);
 
+// הגשת קבצים סטטיים מתיקיית client
+const clientPath = path.join(__dirname, '../client');
+app.use(express.static(clientPath));
+
+// ניתוב ברירת מחדל לכל בקשה שאינה API – הגשת index.html
+app.get('/{*splat}', (req, res) => {
+  res.sendFile(path.join(clientPath, 'index.html'));
+});
 // תופס שגיאות מרכזי
 app.use((err, req, res, next) => {
   const status = err.isJoi ? 400 : err.status || 500;
@@ -61,4 +69,3 @@ mongoose.connect(MONGO_URI)
   .catch((err) => {
     console.error('שגיאה בחיבור למסד הנתונים ❌:', err.message);
   });
-

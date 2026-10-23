@@ -1,8 +1,6 @@
 let allItems = [];
 let editingItemId = null;
 
-window.API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000/api';
-
 function renderItems(items) {
   const container = document.getElementById('items-container');
   if (!container) return;
